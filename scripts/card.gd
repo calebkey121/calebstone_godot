@@ -47,18 +47,17 @@ func _ready():
 	
 	# Connect mouse signals to the clickable area
 	clickable_area.gui_input.connect(_on_clickable_area_input_event)
-	clickable_area.mouse_entered.connect(_on_mouse_entered)
-	clickable_area.mouse_exited.connect(_on_mouse_exited)
 
 func _process(_delta):
-	# Check if we should be expanded (either hovering or being dragged)
-	var should_be_expanded = hovering || CardManager.is_card_dragging(self)
-	
-	# Update visual state accordingly
-	if should_be_expanded && not expanded:
-		expand()
-	elif expanded:
-		shrink()
+	# We should ingore expanding/shrinking if a card is being dragged or another is already expanded
+	if not CardManager.is_any_card_dragging() and not CardManager.other_card_expanded(self):
+		# Check if we should be expanded (either hovering or being dragged)
+		var should_be_expanded = self._is_mouse_hovering()
+		
+		if should_be_expanded and not expanded: 
+			expand()
+		elif not should_be_expanded and expanded:
+			shrink()
 
 func move_card(new_position, duration: float = 0.15):
 	if new_position == null:
@@ -72,6 +71,7 @@ func move_card(new_position, duration: float = 0.15):
 func expand():
 	if expandable:
 		expanded = true
+		CardManager.expand_card(self)
 		self.z_index = 100 # Or any value > siblings' default (0)
 		var tween = create_tween()
 		tween.tween_property(self, "scale", expanded_scale, 0.15) \
@@ -80,8 +80,9 @@ func expand():
 
 func shrink():
 	# Only shrink if not being dragged
-	if !CardManager.is_card_dragging(self):
+	if expandable:
 		expanded = false
+		CardManager.shink_card(self)
 		var tween = create_tween()
 		tween.tween_property(self, "scale", original_scale, 0.15) \
 			.set_trans(Tween.TRANS_LINEAR) \
@@ -99,19 +100,12 @@ func set_base_z_index(index: int):
 func _on_card_state_change(new_state):
 	border_color = new_state
 
-func _on_mouse_entered():
-	# Ensure we're not currently dragging another card
-	if !CardManager.is_any_card_dragging():
-		hovering = true
-
-func _on_mouse_exited():
-	# Ensure we're not still dragging our card
-	if !CardManager.is_card_dragging(self):
-		hovering = false
-
 func _on_clickable_area_input_event(event):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:
 			CardManager.start_drag(self)
 		elif CardManager.is_card_dragging(self):
 			CardManager.end_drag()
+
+func _is_mouse_hovering() -> bool:
+	return clickable_area.get_global_rect().has_point(get_global_mouse_position())

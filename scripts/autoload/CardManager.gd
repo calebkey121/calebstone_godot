@@ -92,6 +92,7 @@ signal card_hovered(card)
 signal card_unhovered(card)
 
 var dragged_card: Card = null
+var expanded_card: Card = null
 var original_parent = null
 var drag_offset = Vector2.ZERO
 var original_position = Vector2.ZERO
@@ -134,6 +135,20 @@ func is_card_dragging(card: Card) -> bool:
 # Returns whether any card is being dragged
 func is_any_card_dragging() -> bool:
 	return dragged_card != null
+
+# Returns if a card is already expanded
+func other_card_expanded(card: Card) -> bool:
+	if not expanded_card or expanded_card == card:
+		return false
+	return true
+
+func expand_card(card: Card):
+	if card:
+		expanded_card = card
+
+func shink_card(card: Card):
+	if card and card == expanded_card:
+		expanded_card = null
 
 # Called when a card starts being dragged
 func start_drag(card: Card):

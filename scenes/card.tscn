@@ -39,11 +39,10 @@ text_overrun_behavior = 1
 [node name="card_area" type="Control" parent="."]
 layout_mode = 3
 anchors_preset = 0
-offset_top = 1.00003
-offset_right = 53.0
-offset_bottom = 46.0
-scale = Vector2(-3.971, -6.335)
-pivot_offset = Vector2(21.09, 19.695)
+offset_left = -104.92
+offset_top = -136.67
+offset_right = 104.7
+offset_bottom = 139.95
 focus_mode = 2
 mouse_filter = 1
 
@@ -57,5 +56,3 @@ default_color = Color(1, 1, 1, 0)
 
 [connection signal="focus_entered" from="card_area" to="." method="_on_card_area_focus_entered"]
 [connection signal="focus_exited" from="card_area" to="." method="_on_card_area_focus_exited"]
-[connection signal="mouse_entered" from="card_area" to="." method="_on_card_area_mouse_entered"]
-[connection signal="mouse_exited" from="card_area" to="." method="_on_card_area_mouse_exited"]
