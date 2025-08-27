@@ -36,16 +36,8 @@ func add_card(data: CardData):
 	# 5. Trigger animations:
 	#    - Animate the NEW card from deck pos to its final anchor_position
 	card.move_card(card.anchor_position, Settings.card_draw_duration)
-	#    - Animate OTHER cards if they shifted (use reorganize duration)
-	for i in range(len(cards) - 1): # Iterate existing cards
-		var existing_card = cards[i]
-		# Optional check: only move if position actually changed, though moving is cheap
-		if existing_card.position != existing_card.anchor_position:
-			existing_card.move_card(existing_card.anchor_position, Settings.card_reorganize_duration)
 
 	return true
-
-
 
 # create from a list of actual cards, or the json object
 func add_cards(data_array: Array):

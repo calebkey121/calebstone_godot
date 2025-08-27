@@ -111,17 +111,12 @@ func _unhandled_input(event):
 		# If all conditions are met, end the drag.
 		end_drag()
 
-		# Optional: Stop the event from propagating further if needed,
-		# though usually not necessary for a drag release.
-		# get_viewport().set_input_as_handled()
-
 # Ensure update_drag_position is called if a drag is active
-# Add this if you don't already have it somewhere
 func _process(delta):
 	# Smoothly update drag position using lerp if a card is being dragged
 	if dragged_card != null:
 		# Calculate the target position where the card should ideally be
-		var target_pos = get_global_mouse_position() + drag_offset
+		var target_pos = get_local_mouse_position() + drag_offset
 
 		# Interpolate the card's current global position towards the target position
 		# Settings.card_follow_speed determines how quickly it catches up
@@ -208,9 +203,6 @@ func end_drag():
 			# Convert the global position where the drag was released
 			# into the local coordinate space of the original parent (Hand).
 			card.position = original_parent.to_local(release_global_pos)
-
-			# 3. Now, start the tween from this correct starting local position
-			#    to the card's known anchor_position within the hand.
 			card.move_card(card.anchor_position, Settings.card_return_duration)
 
 		else:

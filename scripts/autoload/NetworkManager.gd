@@ -1,7 +1,7 @@
 extends Node
 
 # API Endpoints
-var api_endpoint: String = "http://127.0.0.1:5000"
+var api_endpoint: String = "http://127.0.0.1:5001"
 func get_new_game_endpoint() -> String:
 	return "%s/api/new_game" % [api_endpoint]
 func get_load_game_endpoint(session_id: String) -> String:
