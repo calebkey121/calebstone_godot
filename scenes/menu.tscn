@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://bjc6mr6dlaswj"]
 
-[ext_resource type="Script" uid="uid://cdftm83n0umge" path="res://scripts/menu.gd" id="1_ggjmf"]
+[ext_resource type="Script" uid="uid://byl5mbeqlinpj" path="res://scripts/menu.gd" id="1_ggjmf"]
 
 [node name="Menu" type="Control"]
 layout_mode = 3
@@ -48,6 +48,7 @@ offset_right = 40.0
 offset_bottom = 40.0
 
 [node name="SessionList" type="ItemList" parent="SessionListNode"]
+layout_mode = 0
 offset_left = 50.0
 offset_top = 50.0
 offset_right = 150.0
@@ -75,6 +76,8 @@ offset_bottom = 400.0
 item_count = 2
 item_0/text = "Human"
 item_1/text = "Random"
+item_1/selectable = false
+item_1/disabled = true
 
 [node name="Player1ControllerLabel" type="Label" parent="Player1ControllerNode"]
 layout_mode = 0
@@ -98,6 +101,8 @@ offset_right = 450.0
 offset_bottom = 100.0
 item_count = 2
 item_0/text = "Human"
+item_0/selectable = false
+item_0/disabled = true
 item_1/text = "Random"
 
 [node name="Player2ControllerLabel" type="Label" parent="Player2ControllerNode"]
