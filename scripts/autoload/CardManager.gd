@@ -1,3 +1,12 @@
+# CardManager.gd
+# --------------------------
+# Centralized manager for creating and adjusting card visuals in the game.
+# Handles:
+# - Spawning cards from CardData
+# - Assigning frame and art settings
+# - Drag-and-drop mechanics across scenes (via UILayer)
+# - Visual-only operations (no gameplay logic)
+# --------------------------
 extends Node2D
 
 var CardScene = preload("res://scenes/card.tscn")
@@ -20,11 +29,7 @@ func create_hero(hero_data: CardData):
 	return adjust_card(hero_card, hero_data)
 
 func adjust_card(card: Card, data: CardData):
-	card.card_name = data.name
-	card.attack = data.attack
-	card.health = data.health
-	card.cost = data.cost
-	card.card_text = data.text
+	card.set_data(data)
 	var card_name = data.name # used for ease further down
 	
 	# Frame Adjustments
@@ -111,12 +116,12 @@ func _unhandled_input(event):
 		# If all conditions are met, end the drag.
 		end_drag()
 
-# Ensure update_drag_position is called if a drag is active
+# Smooth card follow while dragging, using global positioning
 func _process(delta):
 	# Smoothly update drag position using lerp if a card is being dragged
 	if dragged_card != null:
 		# Calculate the target position where the card should ideally be
-		var target_pos = get_local_mouse_position() + drag_offset
+		var target_pos = get_global_mouse_position() + drag_offset
 
 		# Interpolate the card's current global position towards the target position
 		# Settings.card_follow_speed determines how quickly it catches up
@@ -147,77 +152,57 @@ func shink_card(card: Card):
 
 # Called when a card starts being dragged
 func start_drag(card: Card):
-	if dragged_card != null:
+	if dragged_card:
 		end_drag()
-		
+
 	dragged_card = card
 	original_parent = card.get_parent()
 	original_position = card.global_position
-	
-	# Use the global UILayer autoload
 	drag_offset = card.global_position - get_global_mouse_position()
+
 	original_parent.remove_child(card)
 	UILayer.canvas_layer.add_child(card)
 	card.global_position = get_global_mouse_position() + drag_offset
-	
+
 	emit_signal("card_drag_started", card)
 
 # Called when card is released
 func end_drag():
-	if dragged_card != null:
-		var drop_areas = get_tree().get_nodes_in_group("card_drop_area")
-		var valid_drop_area = null
-		var current_mouse_pos = get_global_mouse_position() # Get mouse position once
+	if not dragged_card:
+		return
 
-		# Check if card is over a valid drop area
-		for area in drop_areas:
-			# Assuming area is either Area2D or Control
-			var area_rect = Rect2()
-			if area is Area2D and area.get_child_count() > 0 and area.get_child(0) is CollisionShape2D:
-				# Crude approximation for Area2D, better to use signals if possible
-				area_rect = area.get_child(0).get_shape().get_rect()
-				area_rect.position += area.global_position - area_rect.size / 2.0 # Adjust for center origin
-			elif area is Control:
-				area_rect = area.get_global_rect()
+	var card = dragged_card
+	dragged_card = null
 
-			# Check if mouse pointer is inside the area's rectangle
-			if area_rect.has_point(current_mouse_pos):
-				valid_drop_area = area
-				break
+	var current_mouse_pos = get_global_mouse_position()
+	var drop_areas = get_tree().get_nodes_in_group("card_drop_area")
+	var valid_drop_area = null
 
-		# Store the card before clearing dragged_card
-		var card = dragged_card
-		dragged_card = null # Stop the _process update
+	for area in drop_areas:
+		if area is Control and area.get_global_rect().has_point(current_mouse_pos):
+			valid_drop_area = area
+			break
+		elif area is Area2D:
+			var collision = area.get_node_or_null("CollisionShape2D")
+			if collision and collision.shape:
+				var area_rect = collision.shape.get_rect()
+				area_rect.position += area.global_position - area_rect.size / 2.0
+				if area_rect.has_point(current_mouse_pos):
+					valid_drop_area = area
+					break
 
-		# --- Reparenting and Tweening Logic ---
-		var current_parent = card.get_parent()
-		var release_global_pos
-		if current_parent:
-			release_global_pos = card.global_position
-			current_parent.remove_child(card) # Remove from UILayer
+	var global_release_pos = card.global_position
 
-		if valid_drop_area != null:
-			# Add to the new area FIRST
-			valid_drop_area.add_child(card) # Or call valid_drop_area.add_card(card) if it handles parenting
+	if card.get_parent():
+		card.get_parent().remove_child(card)
 
-			# Convert the global position where the drag was released
-			# into the local coordinate space of the original parent (Hand).
-			card.position = original_parent.to_local(release_global_pos)
-			card.move_card(card.anchor_position, Settings.card_return_duration)
+	if valid_drop_area:
+		valid_drop_area.add_child(card)
+		card.position = valid_drop_area.to_local(global_release_pos)
+		card.move_card(card.anchor_position, Settings.card_return_duration)
+	else:
+		original_parent.add_child(card)
+		card.position = original_parent.to_local(global_release_pos)
+		card.move_card(card.anchor_position, Settings.card_return_duration)
 
-		else:
-			# --- Return to Original Parent and Tween ---
-			# 1. Add back to the original parent
-			original_parent.add_child(card)
-
-			# 2. <<< Set initial position correctly >>>
-			# Convert the global position where the drag was released
-			# into the local coordinate space of the original parent (Hand).
-			card.position = release_global_pos
-
-			# 3. Now, start the tween from this correct starting local position
-			#    to the card's known anchor_position within the hand.
-			card.move_card(card.anchor_position, Settings.card_return_duration)
-			# --- End Tween ---
-
-		emit_signal("card_drag_ended", card, valid_drop_area)
+	emit_signal("card_drag_ended", card, valid_drop_area)

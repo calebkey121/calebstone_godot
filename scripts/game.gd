@@ -26,19 +26,19 @@ func setup(data):
 		"cost": -1,
 		"text": "player1"
 	}
-	var hero_data: CardData = CardData.from_dict(hero_data_dict)
+	var hero_data: CardData = CardData.new(hero_data_dict)
 	hero_data.name = game_data["current_player"]["hero"]["name"]
 	var player1_hero: Card = CardManager.create_hero(hero_data)
-	hero_data.name = game_data["opponent_player"]["hero"]["name"]
+	hero_data.name = game_data["opposing_player"]["hero"]["name"]
 	hero_data.text = "player2"
 	var player2_hero: Card = CardManager.create_hero(hero_data)
 	
 	add_child(player1_hero)
 	add_child(player2_hero)
-	var cards_data = CardData.from_dict_array(game_data["current_player"]["hand"])
-	player1_hand.add_cards(cards_data)
-	cards_data = CardData.from_dict_array(game_data["opponent_player"]["hand"])
-	player2_hand.add_cards(cards_data)
+	for d in game_data["current_player"]["hand"]:
+		player1_hand.add_card(CardData.new(d))
+	for d in game_data["opposing_player"]["hand"]:
+		player2_hand.add_card(CardData.new(d))
 	var hero1_pos := Vector2(0, 0)
 	var hero2_pos := Vector2(-500, -200)
 	player1_hero.get_child(0).offset = hero1_pos

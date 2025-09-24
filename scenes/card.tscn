@@ -1,12 +1,11 @@
 [gd_scene load_steps=3 format=3 uid="uid://cxmjxhojyxrjp"]
 
-[ext_resource type="Script" uid="uid://b4ji8allqwrtl" path="res://scripts/card.gd" id="1_hkf25"]
-[ext_resource type="Texture2D" uid="uid://c5ngg421ev5cc" path="res://assets/card_frames/card_frame_12.png" id="4_1vxne"]
+[ext_resource type="Script" uid="uid://b4ji8allqwrtl" path="res://scripts/Card.gd" id="1_hkf25"]
+[ext_resource type="Texture2D" uid="uid://cwxro1v66mfl" path="res://assets/card_frames/card_frame_12.png" id="4_1vxne"]
 
 [node name="Card" type="Node2D"]
 scale = Vector2(0.5, 0.5)
 script = ExtResource("1_hkf25")
-expandable = true
 
 [node name="card_frame" type="Sprite2D" parent="."]
 z_index = -1

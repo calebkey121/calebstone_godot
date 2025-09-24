@@ -24,6 +24,7 @@ Settings="*res://scripts/autoload/Settings.gd"
 NetworkManager="*res://scripts/autoload/NetworkManager.gd"
 GameState="*res://scripts/autoload/GameState.gd"
 UILayer="*res://scripts/autoload/UILayer.gd"
+CardLibrary="*res://scripts/autoload/CardLibrary.gd"
 
 [display]
 
