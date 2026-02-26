@@ -1,7 +1,7 @@
 extends Node
 
 # API Endpoints
-var api_endpoint: String = "http://192.168.1.232:5000"
+var api_endpoint: String = "http://127.0.0.1:5001"
 func get_new_game_endpoint() -> String:
 	return "%s/api/new_game" % [api_endpoint]
 func get_load_game_endpoint(session_id: String) -> String:
@@ -35,3 +35,13 @@ func get_all_sessions(http_request: HTTPRequest) -> void:
 func get_card_library(http_request: HTTPRequest) -> void:
 	var endpoint: String = get_card_library_endpoint()
 	http_request.request(endpoint, [], HTTPClient.METHOD_GET)
+
+func get_action_endpoint(session_id: String) -> String:
+	return "%s/api/action/%s" % [api_endpoint, session_id]
+
+# Submit a game action (play_card, attack, end_turn) for the current session.
+func submit_action(http_request: HTTPRequest, session_id: String, action: Dictionary) -> void:
+	var endpoint: String = get_action_endpoint(session_id)
+	var body = JSON.stringify(action)
+	var headers = ["Content-Type: application/json"]
+	http_request.request(endpoint, headers, HTTPClient.METHOD_POST, body)

@@ -160,9 +160,8 @@ func start_drag(card: Card):
 	original_position = card.global_position
 	drag_offset = card.global_position - get_global_mouse_position()
 
-	original_parent.remove_child(card)
-	UILayer.canvas_layer.add_child(card)
-	card.global_position = get_global_mouse_position() + drag_offset
+	# Bring card to front via z_index instead of reparenting
+	card.z_index = 100
 
 	emit_signal("card_drag_started", card)
 
@@ -191,18 +190,10 @@ func end_drag():
 					valid_drop_area = area
 					break
 
-	var global_release_pos = card.global_position
+	# Restore z_index
+	card.z_index = card.base_z_index
 
-	if card.get_parent():
-		card.get_parent().remove_child(card)
-
-	if valid_drop_area:
-		valid_drop_area.add_child(card)
-		card.position = valid_drop_area.to_local(global_release_pos)
-		card.move_card(card.anchor_position, Settings.card_return_duration)
-	else:
-		original_parent.add_child(card)
-		card.position = original_parent.to_local(global_release_pos)
-		card.move_card(card.anchor_position, Settings.card_return_duration)
+	# Snap back to anchor position (card was never reparented)
+	card.move_card(card.anchor_position, Settings.card_return_duration)
 
 	emit_signal("card_drag_ended", card, valid_drop_area)

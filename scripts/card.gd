@@ -20,11 +20,14 @@ var base_z_index: float
 var anchor_position := Vector2()
 var hovering: bool = false
 var expanded: bool = false
+var move_tween: Tween = null
 
 @onready var clickable_area = $card_area
 
+
 func _ready():
-	anchor_position = self.global_position
+	# anchor_position is set by Hand.update_card_positions(), not from global_position
+	anchor_position = self.position
 	clickable_area.gui_input.connect(_on_clickable_area_input_event)
 
 func _process(_delta):
@@ -33,9 +36,13 @@ func _process(_delta):
 func move_card(new_position, duration: float = 0.15):
 	if new_position == null:
 		new_position = anchor_position
-	
-	var tween = create_tween()
-	tween.tween_property(self, "position", new_position, duration) \
+
+	# Kill any previous movement tween so tweens don't fight over "position"
+	if move_tween != null and move_tween.is_running():
+		move_tween.kill()
+
+	move_tween = create_tween()
+	move_tween.tween_property(self, "position", new_position, duration) \
 		.set_trans(Tween.TRANS_LINEAR) \
 		.set_ease(Tween.EASE_IN_OUT)
 

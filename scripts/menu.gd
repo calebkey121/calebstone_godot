@@ -30,7 +30,7 @@ func _on_quit_button_pressed():
 # Start game button functionality
 func _on_new_game_button_pressed():
 	current_request = "new_game"
-	NetworkManager.new_game($HTTPRequest, player1_controller, player1_controller)
+	NetworkManager.new_game($HTTPRequest, player1_controller, player2_controller)
 
 # Callback for when the HTTP request completes
 func _on_http_request_completed(_result, response_code, _headers, body):
@@ -38,11 +38,14 @@ func _on_http_request_completed(_result, response_code, _headers, body):
 		var response = JSON.parse_string(body.get_string_from_utf8())
 		if current_request == "new_game":
 			var session_id = response["session_id"]
+			GameState.session_id = session_id
 			session_list.add_item(session_id)
-			
-			# Load the session data
-			current_request = "load_game"
-			NetworkManager.load_game($HTTPRequest, session_id)
+			# Refresh the full session list to show the new game
+			current_request = "get_all_sessions"
+			NetworkManager.get_all_sessions($HTTPRequest)
+		elif current_request == "load_game":
+			# Game state is stored; transition to game scene
+			_load_game_scene()
 		elif current_request == "get_all_sessions":
 			session_list.clear()
 			for session in response:
@@ -60,7 +63,11 @@ func _on_session_list_item_selected(index):
 	GameState.session_id = session_list.get_item_text(index)
 
 func _on_load_game_button_pressed():
-	_load_game_scene()
+	if GameState.session_id == "":
+		print("No session selected.")
+		return
+	current_request = "load_game"
+	NetworkManager.load_game($HTTPRequest, GameState.session_id)
 
 func _on_player_1_controller_item_selected(index):
 	player1_controller = $Player1ControllerNode/Player1Controller.get_item_text(index)

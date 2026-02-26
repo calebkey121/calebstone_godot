@@ -1,47 +1,118 @@
-[gd_scene load_steps=5 format=3 uid="uid://00m8s0mqvnd6"]
+[gd_scene format=3 uid="uid://00m8s0mqvnd6"]
 
 [ext_resource type="Script" uid="uid://cxjlkpqkpd7cl" path="res://scripts/game.gd" id="1_lh5wj"]
 [ext_resource type="PackedScene" uid="uid://dl3ysciev0wmm" path="res://scenes/board.tscn" id="2_d6480"]
 [ext_resource type="PackedScene" uid="uid://bxtrch4lakwhn" path="res://scenes/deck.tscn" id="3_n00ev"]
 [ext_resource type="Script" uid="uid://b2ark2cpv6fs0" path="res://scripts/hand.gd" id="4_lbhrr"]
 
-[node name="Game" type="Node2D"]
+[node name="Game" type="Node2D" unique_id=1429520990]
 script = ExtResource("1_lh5wj")
 
-[node name="Camera2D" type="Camera2D" parent="."]
+[node name="Camera2D" type="Camera2D" parent="." unique_id=1340163217]
 
-[node name="HTTPRequest" type="HTTPRequest" parent="."]
+[node name="HTTPRequest" type="HTTPRequest" parent="." unique_id=1941154426]
 
-[node name="Board" parent="." instance=ExtResource("2_d6480")]
+[node name="Background" type="Polygon2D" parent="." unique_id=832938410]
+z_index = -10
+color = Color(0.12, 0.13, 0.17, 1)
+polygon = PackedVector2Array(-576, -324, 576, -324, 576, 324, -576, 324)
+
+[node name="DividerLine" type="Line2D" parent="." unique_id=1299814211]
+points = PackedVector2Array(-576, 0, 576, 0)
+width = 1.5
+default_color = Color(0.3, 0.3, 0.4, 1)
+
+[node name="Board" parent="." unique_id=1661304626 instance=ExtResource("2_d6480")]
 position = Vector2(80, 83)
 scale = Vector2(0.98, 1)
 
-[node name="Board2" parent="." instance=ExtResource("2_d6480")]
+[node name="Board2" parent="." unique_id=1276972489 instance=ExtResource("2_d6480")]
 position = Vector2(80, -82)
 scale = Vector2(0.98, 1)
 
-[node name="Deck" parent="." instance=ExtResource("3_n00ev")]
+[node name="Deck" parent="." unique_id=457448983 instance=ExtResource("3_n00ev")]
 position = Vector2(517, 242)
 
-[node name="Deck2" parent="." instance=ExtResource("3_n00ev")]
+[node name="Deck2" parent="." unique_id=1929521495 instance=ExtResource("3_n00ev")]
 visible = false
 position = Vector2(492, -234)
 
-[node name="BackButton" type="Button" parent="."]
-offset_left = -550.0
-offset_top = -300.0
-offset_right = -475.0
-offset_bottom = -250.0
-text = "Back"
-
-[node name="Hand" type="Node2D" parent="."]
+[node name="Hand" type="Node2D" parent="." unique_id=1607266280]
 position = Vector2(0, 250)
 script = ExtResource("4_lbhrr")
-metadata/_custom_type_script = "uid://b2ark2cpv6fs0"
 
-[node name="Hand2" type="Node2D" parent="."]
+[node name="Hand2" type="Node2D" parent="." unique_id=484289420]
 position = Vector2(0, -235)
-script = ExtResource("4_lbhrr")
-metadata/_custom_type_script = "uid://b2ark2cpv6fs0"
 
-[connection signal="pressed" from="BackButton" to="." method="_on_back_button_pressed"]
+[node name="HUD" type="Node2D" parent="." unique_id=2016932754]
+z_index = 5
+
+[node name="GoldLabel" type="Label" parent="HUD" unique_id=1005387968]
+offset_left = -556.0
+offset_top = -304.0
+offset_right = -326.0
+offset_bottom = -276.0
+theme_override_font_sizes/font_size = 18
+text = "Gold: 0"
+
+[node name="IncomeLabel" type="Label" parent="HUD" unique_id=527494599]
+offset_left = -556.0
+offset_top = -274.0
+offset_right = -326.0
+offset_bottom = -248.0
+theme_override_font_sizes/font_size = 16
+text = "Income: 0"
+
+[node name="RoundLabel" type="Label" parent="HUD" unique_id=2121137222]
+offset_left = -556.0
+offset_top = -246.0
+offset_right = -326.0
+offset_bottom = -220.0
+theme_override_font_sizes/font_size = 16
+text = "Round: 0"
+
+[node name="StatusLabel" type="Label" parent="HUD" unique_id=1696205500]
+offset_left = -120.0
+offset_top = -304.0
+offset_right = 120.0
+offset_bottom = -269.0
+theme_override_font_sizes/font_size = 20
+text = "Your Turn"
+horizontal_alignment = 1
+
+[node name="P2HeroLabel" type="Label" parent="HUD" unique_id=1694645142]
+offset_left = 286.0
+offset_top = -304.0
+offset_right = 566.0
+offset_bottom = -274.0
+theme_override_colors/font_color = Color(0.9, 0.4, 0.4, 1)
+theme_override_font_sizes/font_size = 18
+text = "Enemy Hero  HP: 0"
+horizontal_alignment = 2
+
+[node name="P1HeroLabel" type="Label" parent="HUD" unique_id=851102119]
+offset_left = -556.0
+offset_top = 284.0
+offset_right = -226.0
+offset_bottom = 314.0
+theme_override_colors/font_color = Color(0.4, 0.9, 0.4, 1)
+theme_override_font_sizes/font_size = 18
+text = "Hero  HP: 0"
+
+[node name="EndTurnButton" type="Button" parent="HUD" unique_id=2134851210]
+offset_left = 376.0
+offset_top = 269.0
+offset_right = 566.0
+offset_bottom = 314.0
+theme_override_font_sizes/font_size = 20
+text = "End Turn"
+
+[node name="BackButton" type="Button" parent="HUD" unique_id=981273428]
+offset_left = 376.0
+offset_top = 219.0
+offset_right = 566.0
+offset_bottom = 262.0
+theme_override_font_sizes/font_size = 16
+text = "Back to Menu"
+
+[connection signal="pressed" from="HUD/BackButton" to="." method="_on_back_button_pressed"]

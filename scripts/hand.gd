@@ -34,8 +34,14 @@ func add_card(data: CardData):
 	update_card_positions()
 
 	# 5. Trigger animations:
-	#    - Animate the NEW card from deck pos to its final anchor_position
-	card.move_card(card.anchor_position, Settings.card_draw_duration)
+	#    - NEW card: deck -> its anchor (draw animation)
+	#    - EXISTING cards: nudge to their new anchors (reorganize animation, short)
+	for c in cards:
+		if c == card:
+			c.move_card(c.anchor_position, Settings.card_draw_duration)
+		else:
+			if c.position != c.anchor_position:
+				c.move_card(c.anchor_position, Settings.card_reorganize_duration)
 
 	return true
 
