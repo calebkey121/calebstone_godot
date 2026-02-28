@@ -26,11 +26,10 @@ extends Node2D
 
 # Debug logging for API traffic
 @export var api_debug := false
-@export var debug_play_card_flow := true
+@export var debug_play_card_flow := false
 
 var debug_action_inflight := false
 var debug_pending_action: Dictionary = {}
-var debug_pending_remove_index := -1
 
 # Attack selection state
 var selected_attacker: Card = null
@@ -177,13 +176,17 @@ func _on_card_drag_ended(card: Card, drop_area) -> void:
 	if instance_id == "":
 		push_error("Cannot play card: missing instance_id")
 		return
+	if not _is_play_card_legal(instance_id):
+		if status_label:
+			status_label.text = "Illegal move"
+			status_label.add_theme_color_override("font_color", Color(1.0, 0.45, 0.45, 1))
+		return
 
 	var action := {"type": "play_card", "card_instance_id": instance_id}
 
 	if debug_play_card_flow and not debug_action_inflight:
 		debug_action_inflight = true
 		debug_pending_action = action
-		debug_pending_remove_index = idx
 		waiting_for_server = true
 		end_turn_button.disabled = true
 		status_label.text = "Waiting..."
@@ -191,9 +194,6 @@ func _on_card_drag_ended(card: Card, drop_area) -> void:
 		NetworkManager.load_game(http_request, GameState.session_id)
 		return
 
-	# Remove card from hand visually; board will fully rebuild on server response
-	if idx != -1:
-		player_hand.remove_card(idx)
 	_submit_action(action)
 
 
@@ -257,6 +257,17 @@ func _submit_action(action: Dictionary) -> void:
 	NetworkManager.submit_action(http_request, GameState.session_id, action)
 
 
+func _is_play_card_legal(card_instance_id: String) -> bool:
+	for action in GameState.legal_actions:
+		if not (action is Dictionary):
+			continue
+		if action.get("type", "") != "play_card":
+			continue
+		if action.get("card_instance_id", "") == card_instance_id:
+			return true
+	return false
+
+
 # ─────────────────────────────────────────────
 #  HTTP RESPONSE
 # ─────────────────────────────────────────────
@@ -265,6 +276,15 @@ func _on_http_request_completed(_result, response_code, _headers, body) -> void:
 	if api_debug:
 		print("API response code -> ", response_code)
 		print("API response body -> ", body.get_string_from_utf8())
+	if response_code == 422:
+		waiting_for_server = false
+		if status_label:
+			status_label.text = "Illegal move"
+			status_label.add_theme_color_override("font_color", Color(1.0, 0.45, 0.45, 1))
+		end_turn_button.disabled = false
+		current_request = RequestType.LOAD_GAME
+		NetworkManager.load_game(http_request, GameState.session_id)
+		return
 	if response_code != 200:
 		push_error("HTTP error: %d" % response_code)
 		waiting_for_server = false
@@ -281,13 +301,9 @@ func _on_http_request_completed(_result, response_code, _headers, body) -> void:
 
 	match current_request:
 		RequestType.LOAD_GAME:
-			var game_state = response.get("game_state", response)
-			setup(game_state)
+			setup(response)
 		RequestType.DEBUG_PRE_ACTION:
 			print("gamestate_before:\n", body.get_string_from_utf8())
-			if debug_pending_remove_index != -1 and debug_pending_remove_index < player_hand.cards.size():
-				player_hand.remove_card(debug_pending_remove_index)
-			debug_pending_remove_index = -1
 			current_request = RequestType.SUBMIT_ACTION
 			NetworkManager.submit_action(http_request, GameState.session_id, debug_pending_action)
 		RequestType.SUBMIT_ACTION:
@@ -295,8 +311,7 @@ func _on_http_request_completed(_result, response_code, _headers, body) -> void:
 			if debug_action_inflight:
 				print("playing card:\n", JSON.stringify(debug_pending_action))
 				print("action_response:\n", body.get_string_from_utf8())
-			var game_state = response.get("game_state", response)
-			setup(game_state)
+			setup(response)
 			if debug_action_inflight:
 				current_request = RequestType.DEBUG_POST_ACTION
 				NetworkManager.load_game(http_request, GameState.session_id)
@@ -304,7 +319,6 @@ func _on_http_request_completed(_result, response_code, _headers, body) -> void:
 			print("gamestate_after:\n", body.get_string_from_utf8())
 			debug_action_inflight = false
 			debug_pending_action = {}
-			debug_pending_remove_index = -1
 
 
 # ─────────────────────────────────────────────

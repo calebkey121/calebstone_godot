@@ -139,35 +139,45 @@ func sync_from_card_data(data_array: Array) -> void:
 		elif data is Dictionary:
 			new_data.append(CardData.new(data))
 
-	var old_count := cards.size()
-	var new_count := new_data.size()
+	# Reuse cards by stable instance_id so visuals stay attached to the right card.
+	var old_cards: Array[Card] = cards.duplicate()
+	var old_by_instance: Dictionary = {}
+	for old_card in old_cards:
+		if old_card and old_card.data and old_card.data.instance_id != "":
+			old_by_instance[old_card.data.instance_id] = old_card
 
-	# Trim extra cards without triggering deck animations.
-	while cards.size() > new_count:
-		var extra = cards.pop_back()
-		hand_count -= 1
-		extra.queue_free()
+	var next_cards: Array[Card] = []
+	var added_cards: Array[Card] = []
 
-	# Update existing cards in place.
-	for i in range(min(old_count, new_count)):
-		cards[i].set_data(new_data[i])
+	for card_data in new_data:
+		var card: Card = null
+		var iid := card_data.instance_id
+		if iid != "" and old_by_instance.has(iid):
+			card = old_by_instance[iid]
+			old_by_instance.erase(iid)
+			card.set_data(card_data)
+		else:
+			card = CardManager.create_card(card_data)
+			if card == null:
+				push_error("Failed to create card instance for: %s" % card_data.name)
+				continue
+			card.position = deck_local_origin_pos
+			add_child(card)
+			added_cards.append(card)
+		next_cards.append(card)
 
-	# Add new cards at the end (these will animate from deck_local_origin_pos).
-	for i in range(old_count, new_count):
-		var card = CardManager.create_card(new_data[i])
-		if card == null:
-			push_error("Failed to create card instance for: %s" % new_data[i].name)
-			continue
-		card.position = deck_local_origin_pos
-		add_child(card)
-		cards.append(card)
-		hand_count += 1
+	# Any leftover old cards are no longer in hand.
+	for old_card in old_cards:
+		if not next_cards.has(old_card):
+			old_card.queue_free()
+
+	cards = next_cards
+	hand_count = cards.size()
 
 	# Recalculate anchors and animate.
 	update_card_positions()
-	for i in range(cards.size()):
-		var card = cards[i]
-		if i >= old_count:
+	for card in cards:
+		if added_cards.has(card):
 			card.move_card(card.anchor_position, Settings.card_draw_duration)
 		elif card.position != card.anchor_position:
 			card.move_card(card.anchor_position, Settings.card_reorganize_duration)
