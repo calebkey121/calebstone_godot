@@ -12,6 +12,7 @@ func preload_textures():
 	textures["card_frame_10"] = preload("res://assets/card_frames/card_frame_10.png")
 	textures["card_frame_11"] = preload("res://assets/card_frames/card_frame_11.png")
 	textures["card_frame_12"] = preload("res://assets/card_frames/card_frame_12.png")
+	textures["card_frame_cf1"] = preload("res://assets/card_frames/cf1.png")
 	textures["Wyndhaven Enclave"] = preload("res://assets/card_art/WyndhavenEnclave.png")
 	textures["Ruthless Baroness"] = preload("res://assets/card_art/RuthlessBaroness.png")
 	textures["Underground Kingpin"] = preload("res://assets/card_art/UndergroundKingpin.png")

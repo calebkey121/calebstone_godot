@@ -13,7 +13,18 @@ func update_card():
 
 # Buttons
 func _on_card_list_item_selected(index):
-	card_data.name = $AllCardsList/AllCards.get_item_text(index)
+	var meta = $AllCardsList/AllCards.get_item_metadata(index)
+	var selected: CardData = CardLibrary.cards.get(meta)
+	if selected == null:
+		var name = $AllCardsList/AllCards.get_item_text(index)
+		selected = CardData.new({
+			"name": name,
+			"attack": 0,
+			"health": 0,
+			"cost": 0,
+			"text": ""
+		})
+	card_data = selected
 	update_card()
 
 func _on_frame_list_item_selected(index):

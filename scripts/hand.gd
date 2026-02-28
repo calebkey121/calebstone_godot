@@ -6,10 +6,8 @@ var hand_count: int = 0
 var max_hand_size: int = 10
 var cards: Array[Card] = []
 
-# We need to know where the deck is relative to the hand's origin
-# This could be set during initialization or fetched dynamically
-# For now, let's assume it's a local position relative to the Hand node's origin
-var deck_local_origin_pos := Vector2(300, 0) # EXAMPLE: Adjust as needed!
+# Where new cards animate from (local to the Hand node)
+@export var deck_local_origin_pos := Vector2(300, 0)
 
 func add_card(data: CardData):
 	if hand_count >= max_hand_size:
@@ -99,8 +97,18 @@ func remove_all_cards():
 # Calculates and sets the target LOCAL anchor_position for each card
 # Does NOT trigger movement itself.
 func update_card_positions():
-	# Calculate the starting x position based on card count, width, and padding
-	var total_width = hand_count * Settings.card_width + max(0, hand_count - 1) * Settings.pad
+	# Calculate effective padding so the hand clamps to a max width and can overlap
+	var viewport_width: float = get_viewport_rect().size.x
+	var max_width: float = min(float(Settings.hand_max_width), viewport_width - float(Settings.hand_margin) * 2.0)
+	max_width = max(max_width, float(Settings.card_width))
+
+	var effective_pad: float = Settings.pad
+	if hand_count > 1:
+		var raw_pad = (max_width - hand_count * Settings.card_width) / float(hand_count - 1)
+		effective_pad = clamp(raw_pad, float(Settings.hand_min_pad), float(Settings.pad))
+
+	# Calculate the starting x position based on card count, width, and effective padding
+	var total_width = hand_count * Settings.card_width + max(0, hand_count - 1) * effective_pad
 	var initial_x_position = -total_width / 2.0 + Settings.card_width / 2.0 # Center the hand
 
 	var x = initial_x_position
@@ -111,4 +119,55 @@ func update_card_positions():
 		card.anchor_position = new_anchor_position # Store the target
 		card.set_base_z_index(i * 5)
 		# Move to the next card's x position
-		x += Settings.card_width + Settings.pad
+		x += Settings.card_width + effective_pad
+
+
+func rebuild_from_card_data(data_array: Array) -> void:
+	remove_all_cards()
+	for data in data_array:
+		if data is CardData:
+			add_card(data)
+		elif data is Dictionary:
+			add_card(CardData.new(data))
+
+
+func sync_from_card_data(data_array: Array) -> void:
+	var new_data: Array[CardData] = []
+	for data in data_array:
+		if data is CardData:
+			new_data.append(data)
+		elif data is Dictionary:
+			new_data.append(CardData.new(data))
+
+	var old_count := cards.size()
+	var new_count := new_data.size()
+
+	# Trim extra cards without triggering deck animations.
+	while cards.size() > new_count:
+		var extra = cards.pop_back()
+		hand_count -= 1
+		extra.queue_free()
+
+	# Update existing cards in place.
+	for i in range(min(old_count, new_count)):
+		cards[i].set_data(new_data[i])
+
+	# Add new cards at the end (these will animate from deck_local_origin_pos).
+	for i in range(old_count, new_count):
+		var card = CardManager.create_card(new_data[i])
+		if card == null:
+			push_error("Failed to create card instance for: %s" % new_data[i].name)
+			continue
+		card.position = deck_local_origin_pos
+		add_child(card)
+		cards.append(card)
+		hand_count += 1
+
+	# Recalculate anchors and animate.
+	update_card_positions()
+	for i in range(cards.size()):
+		var card = cards[i]
+		if i >= old_count:
+			card.move_card(card.anchor_position, Settings.card_draw_duration)
+		elif card.position != card.anchor_position:
+			card.move_card(card.anchor_position, Settings.card_reorganize_duration)

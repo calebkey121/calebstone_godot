@@ -1,42 +1,60 @@
 extends Node2D
 
-# Preloaded scenes
-var AllyScene: PackedScene = preload("res://scenes/ally.tscn")
-var CardBackTexture: Texture2D = preload("res://assets/card_backs/calebstone_cardback.png")
-
 @onready var http_request = $HTTPRequest
 @onready var player_hand: Hand = $Hand
 @onready var player_board = $Board
 @onready var enemy_board = $Board2
-@onready var end_turn_button: Button = $HUD/EndTurnButton
-@onready var gold_label: Label = $HUD/GoldLabel
-@onready var income_label: Label = $HUD/IncomeLabel
-@onready var round_label: Label = $HUD/RoundLabel
-@onready var status_label: Label = $HUD/StatusLabel
-@onready var p1_hero_label: Label = $HUD/P1HeroLabel
-@onready var p2_hero_label: Label = $HUD/P2HeroLabel
-@onready var opponent_hand_container: Node2D = $Hand2
+@onready var end_turn_button: Button = $HUDRoot/TopRightHUD/TopRightVBox/EndTurnButton
+@onready var gold_label: Label = $HUDRoot/LeftBar/LeftBarVBox/PlayerResources/GoldLabel
+@onready var income_label: Label = $HUDRoot/LeftBar/LeftBarVBox/PlayerResources/IncomeLabel
+@onready var round_label: Label = $HUDRoot/TopRightHUD/TopRightVBox/RoundLabel
+@onready var status_label: Label = $HUDRoot/TopRightHUD/TopRightVBox/StatusLabel
+@onready var player_name_label: Label = $HUDRoot/LeftBar/LeftBarVBox/PlayerPortrait/PlayerPortraitVBox/PlayerNameLabel
+@onready var player_hp_label: Label = $HUDRoot/LeftBar/LeftBarVBox/PlayerPortrait/PlayerPortraitVBox/PlayerHPLabel
+@onready var enemy_name_label: Label = $HUDRoot/LeftBar/LeftBarVBox/EnemyPortrait/EnemyPortraitVBox/EnemyNameLabel
+@onready var enemy_hp_label: Label = $HUDRoot/LeftBar/LeftBarVBox/EnemyPortrait/EnemyPortraitVBox/EnemyHPLabel
+@onready var enemy_hand_label: Label = $HUDRoot/LeftBar/LeftBarVBox/EnemyInfo/EnemyHandLabel
+@onready var enemy_gold_label: Label = $HUDRoot/LeftBar/LeftBarVBox/EnemyInfo/EnemyGoldLabel
+@onready var game_over_overlay: PanelContainer = $HUDRoot/GameOverOverlay
+@onready var game_over_sub_label: Label = $HUDRoot/GameOverOverlay/GameOverVBox/GameOverSubLabel
+@onready var hover_popup: PanelContainer = $HUDRoot/HoverPopup
+@onready var hover_name_label: Label = $HUDRoot/HoverPopup/HoverVBox/CardNameLabel
+@onready var hover_cost_label: Label = $HUDRoot/HoverPopup/HoverVBox/CardCostLabel
+@onready var hover_stats_label: Label = $HUDRoot/HoverPopup/HoverVBox/CardStatsLabel
+@onready var hover_text_label: Label = $HUDRoot/HoverPopup/HoverVBox/CardTextLabel
+@onready var opponent_hand: Hand = $Hand2
+
+# Debug logging for API traffic
+@export var api_debug := false
+@export var debug_play_card_flow := true
+
+var debug_action_inflight := false
+var debug_pending_action: Dictionary = {}
+var debug_pending_remove_index := -1
 
 # Attack selection state
-var selected_attacker: Ally = null
-var player_allies: Array = []  # Ally nodes on player board
-var enemy_allies: Array = []   # Ally nodes on enemy board
+var selected_attacker: Card = null
+var player_allies: Array = []  # Card nodes on player board
+var enemy_allies: Array = []   # Card nodes on enemy board
 
 # Prevent double-input while a request is in-flight
 var waiting_for_server: bool = false
 
 # Which HTTP response are we expecting
-enum RequestType { LOAD_GAME, SUBMIT_ACTION }
+enum RequestType { LOAD_GAME, SUBMIT_ACTION, DEBUG_PRE_ACTION, DEBUG_POST_ACTION }
 var current_request: RequestType = RequestType.LOAD_GAME
 
 
 func _ready() -> void:
 	http_request.request_completed.connect(_on_http_request_completed)
-	end_turn_button.pressed.connect(_on_end_turn_pressed)
 	CardManager.card_drag_ended.connect(_on_card_drag_ended)
+	CardManager.card_hovered.connect(_on_card_hovered)
+	CardManager.card_unhovered.connect(_on_card_unhovered)
 
 	# Mark the player's board as a valid card drop zone
-	player_board.add_to_group("card_drop_area")
+	var player_board_area = player_board.get_node_or_null("Area2D")
+	if player_board_area:
+		player_board_area.add_to_group("card_drop_area")
 
 	# Load initial game state from server
 	current_request = RequestType.LOAD_GAME
@@ -62,9 +80,7 @@ func setup(data: Dictionary) -> void:
 
 
 func _rebuild_hand() -> void:
-	player_hand.remove_all_cards()
-	for card_dict in GameState.current_player.get("hand", []):
-		player_hand.add_card(CardData.new(card_dict))
+	player_hand.sync_from_card_data(GameState.current_player.get("hand", []))
 
 
 func _rebuild_boards() -> void:
@@ -81,52 +97,64 @@ func _rebuild_boards() -> void:
 
 	# Army index 0 is the hero — shown in HUD labels, still spawned on board for targeting
 	for i in range(player_army.size()):
-		var ally: Ally = _spawn_ally(player_army[i], i, true)
-		player_board.add_child(ally)
-		player_allies.append(ally)
-		ally.position = Vector2((i - player_army.size() / 2.0 + 0.5) * 130, 0)
+		var card: Card = _spawn_board_card(player_army[i], i, true)
+		player_board.add_child(card)
+		player_allies.append(card)
+		card.position = Vector2((i - player_army.size() / 2.0 + 0.5) * 130, 0)
+		card.anchor_position = card.position
 
 	for i in range(enemy_army.size()):
-		var ally: Ally = _spawn_ally(enemy_army[i], i, false)
-		enemy_board.add_child(ally)
-		enemy_allies.append(ally)
-		ally.position = Vector2((i - enemy_army.size() / 2.0 + 0.5) * 130, 0)
+		var card: Card = _spawn_board_card(enemy_army[i], i, false)
+		enemy_board.add_child(card)
+		enemy_allies.append(card)
+		card.position = Vector2((i - enemy_army.size() / 2.0 + 0.5) * 130, 0)
+		card.anchor_position = card.position
 
 
-func _spawn_ally(ally_data: Dictionary, index: int, is_player: bool) -> Ally:
-	var ally: Ally = AllyScene.instantiate()
-	ally.setup(ally_data, index, is_player)
-	ally.ally_clicked.connect(_on_ally_clicked)
-	return ally
+func _spawn_board_card(ally_data: Dictionary, index: int, is_player: bool) -> Card:
+	var card_data = CardData.new(ally_data)
+	var card: Card = CardManager.create_card(card_data)
+	card.setup_board(ally_data, index, is_player)
+	card.card_clicked.connect(_on_board_card_clicked)
+	return card
 
 
 func _rebuild_opponent_hand() -> void:
-	for child in opponent_hand_container.get_children():
-		child.queue_free()
+	var opponent_cards: Array = GameState.opposing_player.get("hand", [])
+	opponent_hand.sync_from_card_data(opponent_cards)
+	for card in opponent_hand.cards:
+		card.set_face_down(true)
 
-	var hand_count: int = GameState.opposing_player.get("hand", []).size()
-	for i in range(hand_count):
-		var card_back = Sprite2D.new()
-		card_back.texture = CardBackTexture
-		card_back.scale = Vector2(0.1, 0.1)
-		card_back.position = Vector2((i - hand_count / 2.0 + 0.5) * 70, 0)
-		opponent_hand_container.add_child(card_back)
+
 
 
 func _update_hud() -> void:
 	var cp = GameState.current_player
 	var op = GameState.opposing_player
 
+	round_label.text = "Round %d" % GameState.current_round
 	gold_label.text = "Gold: %d" % cp.get("gold", 0)
 	income_label.text = "Income: %d" % cp.get("income", 0)
-	round_label.text = "Round: %d" % GameState.current_round
 
 	var p1_hero = cp.get("hero", {})
 	var p2_hero = op.get("hero", {})
-	p1_hero_label.text = "%s  HP: %d" % [p1_hero.get("name", "Hero"), p1_hero.get("health", 0)]
-	p2_hero_label.text = "%s  HP: %d" % [p2_hero.get("name", "Hero"), p2_hero.get("health", 0)]
+	player_name_label.text = p1_hero.get("name", "You")
+	player_hp_label.text = "HP: %d" % p1_hero.get("health", 0)
+	enemy_name_label.text = p2_hero.get("name", "Enemy")
+	enemy_hp_label.text = "HP: %d" % p2_hero.get("health", 0)
 
-	status_label.text = "Waiting..." if waiting_for_server else "Your Turn"
+	var enemy_hand_count: int = op.get("hand", []).size()
+	enemy_hand_label.text = "Hand: %d" % enemy_hand_count
+	enemy_gold_label.text = "Gold: %d  /  Income: %d" % [
+		op.get("gold", 0), op.get("income", 0)
+	]
+
+	if waiting_for_server:
+		status_label.text = "Waiting..."
+		status_label.add_theme_color_override("font_color", Color(0.9, 0.6, 0.2, 1))
+	else:
+		status_label.text = "Your Turn"
+		status_label.add_theme_color_override("font_color", Color(0.4, 1.0, 0.5, 1))
 	end_turn_button.disabled = waiting_for_server
 
 
@@ -143,40 +171,63 @@ func _on_card_drag_ended(card: Card, drop_area) -> void:
 	var idx = player_hand.cards.find(card)
 	if idx == -1:
 		return
+	var instance_id = ""
+	if card and card.data:
+		instance_id = card.data.instance_id
+	if instance_id == "":
+		push_error("Cannot play card: missing instance_id")
+		return
+
+	var action := {"type": "play_card", "card_instance_id": instance_id}
+
+	if debug_play_card_flow and not debug_action_inflight:
+		debug_action_inflight = true
+		debug_pending_action = action
+		debug_pending_remove_index = idx
+		waiting_for_server = true
+		end_turn_button.disabled = true
+		status_label.text = "Waiting..."
+		current_request = RequestType.DEBUG_PRE_ACTION
+		NetworkManager.load_game(http_request, GameState.session_id)
+		return
 
 	# Remove card from hand visually; board will fully rebuild on server response
-	player_hand.remove_card(idx)
-	_submit_action({"type": "play_card", "card_index": idx})
+	if idx != -1:
+		player_hand.remove_card(idx)
+	_submit_action(action)
 
 
-func _on_ally_clicked(ally: Ally) -> void:
+func _on_board_card_clicked(card: Card) -> void:
 	if waiting_for_server:
 		return
 
-	if ally.is_player_ally:
+	if card.is_player_ally:
 		# Selecting / deselecting a friendly attacker
-		if selected_attacker == ally:
-			ally.set_selected(false)
+		if selected_attacker == card:
+			card.set_selected(false)
 			selected_attacker = null
 			_clear_target_highlights()
-		elif ally.data.get("can_attack", false):
+		elif card.can_attack:
 			if selected_attacker:
 				selected_attacker.set_selected(false)
-			selected_attacker = ally
-			ally.set_selected(true)
+			selected_attacker = card
+			card.set_selected(true)
 			_highlight_targets()
 	else:
 		# Clicking an enemy: perform attack if we have a selected attacker
 		if selected_attacker != null:
-			var attacker_idx = selected_attacker.army_index
-			var target_idx = ally.army_index
+			var attacker_iid = selected_attacker.data.instance_id if selected_attacker.data else ""
+			var target_iid = card.data.instance_id if card.data else ""
+			if attacker_iid == "" or target_iid == "":
+				push_error("Cannot attack: missing instance_id")
+				return
 			selected_attacker.set_selected(false)
 			selected_attacker = null
 			_clear_target_highlights()
 			_submit_action({
 				"type": "attack",
-				"attacker_index": attacker_idx,
-				"target_index": target_idx
+				"attacker_id": attacker_iid,
+				"target_id": target_iid
 			})
 
 
@@ -197,6 +248,8 @@ func _on_end_turn_pressed() -> void:
 
 
 func _submit_action(action: Dictionary) -> void:
+	if api_debug:
+		print("API action -> ", JSON.stringify(action))
 	waiting_for_server = true
 	end_turn_button.disabled = true
 	status_label.text = "Waiting..."
@@ -209,6 +262,9 @@ func _submit_action(action: Dictionary) -> void:
 # ─────────────────────────────────────────────
 
 func _on_http_request_completed(_result, response_code, _headers, body) -> void:
+	if api_debug:
+		print("API response code -> ", response_code)
+		print("API response body -> ", body.get_string_from_utf8())
 	if response_code != 200:
 		push_error("HTTP error: %d" % response_code)
 		waiting_for_server = false
@@ -225,11 +281,30 @@ func _on_http_request_completed(_result, response_code, _headers, body) -> void:
 
 	match current_request:
 		RequestType.LOAD_GAME:
-			setup(response)
-		RequestType.SUBMIT_ACTION:
-			# Action responses: { "status": "success", "game_state": {...} }
 			var game_state = response.get("game_state", response)
 			setup(game_state)
+		RequestType.DEBUG_PRE_ACTION:
+			print("gamestate_before:\n", body.get_string_from_utf8())
+			if debug_pending_remove_index != -1 and debug_pending_remove_index < player_hand.cards.size():
+				player_hand.remove_card(debug_pending_remove_index)
+			debug_pending_remove_index = -1
+			current_request = RequestType.SUBMIT_ACTION
+			NetworkManager.submit_action(http_request, GameState.session_id, debug_pending_action)
+		RequestType.SUBMIT_ACTION:
+			# Action responses: { "status": "success", "game_state": {...} }
+			if debug_action_inflight:
+				print("playing card:\n", JSON.stringify(debug_pending_action))
+				print("action_response:\n", body.get_string_from_utf8())
+			var game_state = response.get("game_state", response)
+			setup(game_state)
+			if debug_action_inflight:
+				current_request = RequestType.DEBUG_POST_ACTION
+				NetworkManager.load_game(http_request, GameState.session_id)
+		RequestType.DEBUG_POST_ACTION:
+			print("gamestate_after:\n", body.get_string_from_utf8())
+			debug_action_inflight = false
+			debug_pending_action = {}
+			debug_pending_remove_index = -1
 
 
 # ─────────────────────────────────────────────
@@ -237,8 +312,29 @@ func _on_http_request_completed(_result, response_code, _headers, body) -> void:
 # ─────────────────────────────────────────────
 
 func _show_game_over() -> void:
-	status_label.text = "Game Over!"
+	var winner = GameState.current_player.get("hero", {}).get("health", 0)
+	game_over_sub_label.text = "You Win!" if winner > 0 else "You Lose!"
+	game_over_overlay.visible = true
 	end_turn_button.disabled = true
+
+
+func _on_card_hovered(card: Card) -> void:
+	if card == null or card.data == null:
+		return
+	if card.face_down:
+		hover_popup.visible = false
+		return
+	hover_name_label.text = card.data.name
+	hover_cost_label.text = "Cost: %d" % card.data.cost
+	hover_stats_label.text = "ATK %d  •  HP %d" % [card.data.attack, card.data.health]
+	hover_text_label.text = card.data.text if card.data.text != "" else " "
+	hover_popup.visible = true
+
+
+func _on_card_unhovered(_card: Card) -> void:
+	hover_popup.visible = false
+
+
 
 
 # ─────────────────────────────────────────────

@@ -1,61 +1,84 @@
-[gd_scene load_steps=2 format=3 uid="uid://ally_scene_calebstone"]
+[gd_scene format=3 uid="uid://dt7gpkut2wiqw"]
 
-[ext_resource type="Script" uid="uid://ally_script_calebstone" path="res://scripts/Ally.gd" id="1_ally"]
-
-[node name="Ally" type="Node2D"]
+[ext_resource type="Script" uid="uid://duj56fb2t7ik8" path="res://scripts/Ally.gd" id="1_ally"]
+[node name="Ally" type="Node2D" unique_id=1085066995]
 script = ExtResource("1_ally")
 
-[node name="bg" type="ColorRect" parent="."]
-offset_left = -55.0
-offset_top = -70.0
-offset_right = 55.0
-offset_bottom = 70.0
-color = Color(0.15, 0.15, 0.2, 0.9)
+[node name="bg" type="ColorRect" parent="." unique_id=2109597219]
+offset_left = -105.0
+offset_top = -140.0
+offset_right = 105.0
+offset_bottom = 140.0
+color = Color(0.15, 0.15, 0.2, 0)
 
-[node name="name_label" type="Label" parent="."]
-offset_left = -50.0
-offset_top = -65.0
-offset_right = 50.0
-offset_bottom = -35.0
+[node name="CardVisual" type="Node2D" parent="." unique_id=1416770825]
+scale = Vector2(0.5, 0.5)
+
+[node name="card_frame" type="Sprite2D" parent="CardVisual" unique_id=890161563]
+z_index = -1
+scale = Vector2(0.33, 0.33)
+
+[node name="card_art" type="Sprite2D" parent="CardVisual" unique_id=684906658]
+z_index = -2
+scale = Vector2(0.153, 0.153)
+region_enabled = true
+region_rect = Rect2(0, 0, 1024, 1024)
+
+[node name="name_label" type="Label" parent="." unique_id=1340763749]
+visible = false
+offset_left = -95.0
+offset_top = -128.0
+offset_right = 95.0
+offset_bottom = -98.0
 theme_override_font_sizes/font_size = 10
 text = "Ally Name"
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 2
 
-[node name="attack_label" type="Label" parent="."]
-offset_left = -50.0
-offset_top = 35.0
-offset_right = -5.0
-offset_bottom = 65.0
-theme_override_colors/font_color = Color(1.0, 0.85, 0.1, 1)
+[node name="attack_label" type="Label" parent="." unique_id=1239831840]
+offset_left = -80.28
+offset_top = 58.7
+offset_right = -0.27999878
+offset_bottom = 88.7
+theme_override_colors/font_color = Color(1, 0.85, 0.1, 1)
 theme_override_font_sizes/font_size = 16
 text = "0"
 horizontal_alignment = 1
 
-[node name="health_label" type="Label" parent="."]
-offset_left = 5.0
-offset_top = 35.0
-offset_right = 50.0
-offset_bottom = 65.0
-theme_override_colors/font_color = Color(0.2, 1.0, 0.3, 1)
+[node name="health_label" type="Label" parent="." unique_id=226597449]
+offset_left = -0.16
+offset_top = 58.7
+offset_right = 79.84
+offset_bottom = 88.7
+theme_override_colors/font_color = Color(0.2, 1, 0.3, 1)
 theme_override_font_sizes/font_size = 16
 text = "0"
 horizontal_alignment = 1
 
-[node name="border" type="Line2D" parent="."]
-points = PackedVector2Array(-55, -70, 55, -70, 55, 70, -55, 70)
+[node name="cost_label" type="Label" parent="." unique_id=1310290047]
+offset_left = -95.0
+offset_top = -120.0
+offset_right = -35.0
+offset_bottom = -90.0
+theme_override_colors/font_color = Color(0.95, 0.85, 0.35, 1)
+theme_override_font_sizes/font_size = 16
+text = "0"
+horizontal_alignment = 1
+
+[node name="border" type="Line2D" parent="." unique_id=118286303]
+points = PackedVector2Array(-105, -140, 105, -140, 105, 140, -105, 140)
 closed = true
 width = 2.5
 default_color = Color(1, 1, 1, 0)
 
-[node name="clickable_area" type="Control" parent="."]
+[node name="clickable_area" type="Control" parent="." unique_id=1230638306]
 layout_mode = 3
 anchors_preset = 0
-offset_left = -55.0
-offset_top = -70.0
-offset_right = 55.0
-offset_bottom = 70.0
+offset_left = -105.0
+offset_top = -140.0
+offset_right = 105.0
+offset_bottom = 140.0
 focus_mode = 2
 mouse_filter = 1
 

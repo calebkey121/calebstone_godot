@@ -70,7 +70,7 @@ func adjust_card(card: Card, data: CardData):
 	
 	set_frame_texture(card, frame, frame_position, frame_scale)
 	set_card_texture(card, card_name, art_region_rect, art_position, art_scale)
-	card.get_node("card_name_label").text = card_name
+	#card.get_node("card_name_label").text = card_name
 	return card
 
 
@@ -163,6 +163,10 @@ func start_drag(card: Card):
 	# Bring card to front via z_index instead of reparenting
 	card.z_index = 100
 
+	if expanded_card:
+		emit_signal("card_unhovered", expanded_card)
+		expanded_card = null
+
 	emit_signal("card_drag_started", card)
 
 # Called when card is released
@@ -182,13 +186,23 @@ func end_drag():
 			valid_drop_area = area
 			break
 		elif area is Area2D:
-			var collision = area.get_node_or_null("CollisionShape2D")
-			if collision and collision.shape:
-				var area_rect = collision.shape.get_rect()
-				area_rect.position += area.global_position - area_rect.size / 2.0
-				if area_rect.has_point(current_mouse_pos):
+			var shapes: Array = []
+			for child in area.get_children():
+				if child is CollisionShape2D and child.shape:
+					shapes.append(child)
+			if shapes.is_empty():
+				var parent = area.get_parent()
+				if parent:
+					for sibling in parent.get_children():
+						if sibling is CollisionShape2D and sibling.shape:
+							shapes.append(sibling)
+			for shape_node in shapes:
+				var local_pos = shape_node.to_local(current_mouse_pos)
+				if _shape_has_point(shape_node.shape, local_pos):
 					valid_drop_area = area
 					break
+			if valid_drop_area:
+				break
 
 	# Restore z_index
 	card.z_index = card.base_z_index
@@ -197,3 +211,14 @@ func end_drag():
 	card.move_card(card.anchor_position, Settings.card_return_duration)
 
 	emit_signal("card_drag_ended", card, valid_drop_area)
+
+
+func _shape_has_point(shape: Shape2D, local_pos: Vector2) -> bool:
+	if shape is RectangleShape2D:
+		var rect = Rect2(-shape.size * 0.5, shape.size)
+		return rect.has_point(local_pos)
+	if shape is CircleShape2D:
+		return local_pos.length() <= shape.radius
+	# Fallback to shape rect if available
+	var rect_fallback = shape.get_rect()
+	return rect_fallback.has_point(local_pos)

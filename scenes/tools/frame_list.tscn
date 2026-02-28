@@ -1,8 +1,8 @@
-[gd_scene load_steps=2 format=3 uid="uid://bct6e3k8s2cs3"]
+[gd_scene format=3 uid="uid://bct6e3k8s2cs3"]
 
-[ext_resource type="Script" uid="uid://ide82ywiapfh" path="res://scripts/tools/frame_list.gd" id="1_m27it"]
+[ext_resource type="Script" uid="uid://hyikughsvo5c" path="res://scripts/tools/frame_list.gd" id="1_m27it"]
 
-[node name="FrameList" type="Control"]
+[node name="FrameList" type="Control" unique_id=295263117]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -11,7 +11,8 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_m27it")
 
-[node name="Label3" type="Label" parent="."]
+[node name="Label3" type="Label" parent="." unique_id=1515360124]
+layout_mode = 0
 offset_left = 34.19
 offset_top = 1.0
 offset_right = 115.19
@@ -19,7 +20,8 @@ offset_bottom = 33.0
 theme_override_font_sizes/font_size = 23
 text = "Frames"
 
-[node name="Frames" type="ItemList" parent="."]
+[node name="Frames" type="ItemList" parent="." unique_id=1685089778]
+layout_mode = 0
 offset_left = 2.0
 offset_top = 31.0
 offset_right = 152.0

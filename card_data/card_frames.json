@@ -26,8 +26,37 @@
 		  "x": 0.2,
 		  "y": 0.2
 		}
-	  }, 
-		
+		  }
+	}
+  },
+  "card_frame_cf1": {
+	"frame_adjustment": {
+	  "position": {
+		"x": -0.27,
+		"y": 8.79
+	  },
+	  "scale": {
+		"x": 0.233,
+		"y": 0.255
+	  }
+	},
+	"art_adjustment": {
+	  "default": {
+		"region_rect": {
+		  "x": 0,
+		  "y": 0,
+		  "width": 1024,
+		  "height": 1024
+		},
+		"position": {
+		  "x": 0,
+		  "y": 3.61
+		},
+		"scale": {
+		  "x": 0.2,
+		  "y": 0.22
+		}
+	  }
 	}
   },
   "card_frame_1": {

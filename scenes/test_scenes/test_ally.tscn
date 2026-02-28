@@ -1,0 +1,24 @@
+[gd_scene format=3 uid="uid://cndfdh2it1jdm"]
+
+[ext_resource type="Script" uid="uid://test_ally_script" path="res://scripts/test_scripts/test_ally.gd" id="1_test_ally"]
+[ext_resource type="PackedScene" uid="uid://dt7gpkut2wiqw" path="res://scenes/ally.tscn" id="2_ally"]
+[ext_resource type="PackedScene" uid="uid://bct6e3k8s2cs3" path="res://scenes/tools/frame_list.tscn" id="3_frames"]
+[ext_resource type="PackedScene" uid="uid://66dsac8kib7" path="res://scenes/tools/all_cards_list.tscn" id="4_cards"]
+
+[node name="TestAlly" type="Node2D"]
+script = ExtResource("1_test_ally")
+
+[node name="FrameList" parent="." instance=ExtResource("3_frames")]
+offset_left = 2.0
+offset_top = -4.0
+offset_right = 2.0
+offset_bottom = -4.0
+
+[node name="AllCardsList" parent="." instance=ExtResource("4_cards")]
+offset_left = 153.0
+offset_top = -4.0
+offset_right = 153.0
+offset_bottom = -4.0
+
+[node name="Ally" parent="." instance=ExtResource("2_ally")]
+position = Vector2(600, 360)

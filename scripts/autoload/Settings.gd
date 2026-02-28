@@ -7,8 +7,13 @@ var cards: Array = []
 # Settings
 var pad: int = 15
 var card_width: int = 105
-var card_frame: String = "card_frame"
+var card_frame: String = "card_frame_cf1"
 var hero_frame: String = "card_frame_10"
+var hand_max_width: int = 500
+var hand_margin: int = 120
+var hand_min_pad: int = -1000
+var card_hover_scale: float = 1.15
+var card_hover_duration: float = 0.12
 
 # How quickly the card catches up to the mouse cursor during drag (higher = faster)
 # Good values are often between 5.0 and 15.0

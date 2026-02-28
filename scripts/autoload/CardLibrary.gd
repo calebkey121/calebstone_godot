@@ -16,8 +16,8 @@ func _ready():
 func _on_response(result, response_code, headers, body):
 	if response_code == 200:
 		var parsed = JSON.parse_string(body.get_string_from_utf8())
-		for id in parsed:
-			cards[id] = CardData.new(parsed[id])
+		for card_data in parsed["cards"]:
+			cards[card_data["card_id"]] = CardData.new(card_data)
 		is_loaded = true
 		emit_signal("card_library_loaded")
 	else:

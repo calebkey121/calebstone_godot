@@ -14,23 +14,17 @@ script = ExtResource("1_lh5wj")
 
 [node name="Background" type="Polygon2D" parent="." unique_id=832938410]
 z_index = -10
-color = Color(0.12, 0.13, 0.17, 1)
+color = Color(0.91, 0.86, 0.78, 1)
 polygon = PackedVector2Array(-576, -324, 576, -324, 576, 324, -576, 324)
 
-[node name="DividerLine" type="Line2D" parent="." unique_id=1299814211]
-points = PackedVector2Array(-576, 0, 576, 0)
-width = 1.5
-default_color = Color(0.3, 0.3, 0.4, 1)
-
 [node name="Board" parent="." unique_id=1661304626 instance=ExtResource("2_d6480")]
-position = Vector2(80, 83)
-scale = Vector2(0.98, 1)
+position = Vector2(110, 90)
 
 [node name="Board2" parent="." unique_id=1276972489 instance=ExtResource("2_d6480")]
-position = Vector2(80, -82)
-scale = Vector2(0.98, 1)
+position = Vector2(110, -90)
 
 [node name="Deck" parent="." unique_id=457448983 instance=ExtResource("3_n00ev")]
+visible = false
 position = Vector2(517, 242)
 
 [node name="Deck2" parent="." unique_id=1929521495 instance=ExtResource("3_n00ev")]
@@ -38,81 +32,243 @@ visible = false
 position = Vector2(492, -234)
 
 [node name="Hand" type="Node2D" parent="." unique_id=1607266280]
-position = Vector2(0, 250)
+position = Vector2(110, 250)
 script = ExtResource("4_lbhrr")
+deck_local_origin_pos = Vector2(520, 180)
 
 [node name="Hand2" type="Node2D" parent="." unique_id=484289420]
-position = Vector2(0, -235)
+position = Vector2(110, -253.97)
+script = ExtResource("4_lbhrr")
+deck_local_origin_pos = Vector2(520, -180)
 
-[node name="HUD" type="Node2D" parent="." unique_id=2016932754]
-z_index = 5
+[node name="HUDRoot" type="Control" parent="." unique_id=650364958]
+layout_mode = 3
+anchors_preset = 0
+offset_left = -576.0
+offset_top = -324.0
+offset_right = 576.0
+offset_bottom = 324.0
+mouse_filter = 2
 
-[node name="GoldLabel" type="Label" parent="HUD" unique_id=1005387968]
-offset_left = -556.0
-offset_top = -304.0
-offset_right = -326.0
-offset_bottom = -276.0
+[node name="LeftBar" type="PanelContainer" parent="HUDRoot" unique_id=2056869120]
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_right = 220.0
+grow_horizontal = 0
+grow_vertical = 2
+mouse_filter = 1
+
+[node name="LeftBarVBox" type="VBoxContainer" parent="HUDRoot/LeftBar" unique_id=277036328]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 14
+
+[node name="EnemyPortrait" type="PanelContainer" parent="HUDRoot/LeftBar/LeftBarVBox" unique_id=179359065]
+layout_mode = 2
+
+[node name="EnemyPortraitVBox" type="VBoxContainer" parent="HUDRoot/LeftBar/LeftBarVBox/EnemyPortrait" unique_id=587518331]
+layout_mode = 2
+
+[node name="EnemyNameLabel" type="Label" parent="HUDRoot/LeftBar/LeftBarVBox/EnemyPortrait/EnemyPortraitVBox" unique_id=1323673383]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.55, 0.55, 1)
+theme_override_font_sizes/font_size = 13
+text = "Enemy"
+horizontal_alignment = 1
+
+[node name="EnemyHPLabel" type="Label" parent="HUDRoot/LeftBar/LeftBarVBox/EnemyPortrait/EnemyPortraitVBox" unique_id=858611441]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.3, 0.3, 1)
 theme_override_font_sizes/font_size = 18
+text = "HP: --"
+horizontal_alignment = 1
+
+[node name="EnemyInfo" type="VBoxContainer" parent="HUDRoot/LeftBar/LeftBarVBox" unique_id=1610511204]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="EnemyHandLabel" type="Label" parent="HUDRoot/LeftBar/LeftBarVBox/EnemyInfo" unique_id=183631904]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.8, 1)
+theme_override_font_sizes/font_size = 12
+text = "Hand: 0"
+
+[node name="EnemyGoldLabel" type="Label" parent="HUDRoot/LeftBar/LeftBarVBox/EnemyInfo" unique_id=1220375231]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.8, 0.3, 1)
+theme_override_font_sizes/font_size = 12
+text = "Gold: 0 / Income: 0"
+
+[node name="LeftSpacer" type="Control" parent="HUDRoot/LeftBar/LeftBarVBox" unique_id=1348975572]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="PlayerResources" type="VBoxContainer" parent="HUDRoot/LeftBar/LeftBarVBox" unique_id=563283024]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="GoldLabel" type="Label" parent="HUDRoot/LeftBar/LeftBarVBox/PlayerResources" unique_id=1865203297]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
+theme_override_font_sizes/font_size = 16
 text = "Gold: 0"
 
-[node name="IncomeLabel" type="Label" parent="HUD" unique_id=527494599]
-offset_left = -556.0
-offset_top = -274.0
-offset_right = -326.0
-offset_bottom = -248.0
-theme_override_font_sizes/font_size = 16
+[node name="IncomeLabel" type="Label" parent="HUDRoot/LeftBar/LeftBarVBox/PlayerResources" unique_id=1459866149]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.5, 1)
+theme_override_font_sizes/font_size = 13
 text = "Income: 0"
 
-[node name="RoundLabel" type="Label" parent="HUD" unique_id=2121137222]
-offset_left = -556.0
-offset_top = -246.0
-offset_right = -326.0
-offset_bottom = -220.0
-theme_override_font_sizes/font_size = 16
-text = "Round: 0"
+[node name="PlayerPortrait" type="PanelContainer" parent="HUDRoot/LeftBar/LeftBarVBox" unique_id=1095961361]
+layout_mode = 2
 
-[node name="StatusLabel" type="Label" parent="HUD" unique_id=1696205500]
-offset_left = -120.0
-offset_top = -304.0
-offset_right = 120.0
-offset_bottom = -269.0
+[node name="PlayerPortraitVBox" type="VBoxContainer" parent="HUDRoot/LeftBar/LeftBarVBox/PlayerPortrait" unique_id=759601682]
+layout_mode = 2
+alignment = 1
+
+[node name="PlayerNameLabel" type="Label" parent="HUDRoot/LeftBar/LeftBarVBox/PlayerPortrait/PlayerPortraitVBox" unique_id=792933341]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.9, 0.55, 1)
+theme_override_font_sizes/font_size = 13
+text = "You"
+horizontal_alignment = 1
+
+[node name="PlayerHPLabel" type="Label" parent="HUDRoot/LeftBar/LeftBarVBox/PlayerPortrait/PlayerPortraitVBox" unique_id=1931184390]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 1, 0.4, 1)
 theme_override_font_sizes/font_size = 20
+text = "HP: --"
+horizontal_alignment = 1
+
+[node name="TopRightHUD" type="PanelContainer" parent="HUDRoot" unique_id=1485861163]
+layout_mode = 0
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -230.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = 108.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 1
+
+[node name="TopRightVBox" type="VBoxContainer" parent="HUDRoot/TopRightHUD" unique_id=731073548]
+layout_mode = 2
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="RoundLabel" type="Label" parent="HUDRoot/TopRightHUD/TopRightVBox" unique_id=1989487001]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 14
+text = "Round 1"
+horizontal_alignment = 1
+
+[node name="StatusLabel" type="Label" parent="HUDRoot/TopRightHUD/TopRightVBox" unique_id=1989487002]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.9, 0.5, 1)
+theme_override_font_sizes/font_size = 11
 text = "Your Turn"
 horizontal_alignment = 1
 
-[node name="P2HeroLabel" type="Label" parent="HUD" unique_id=1694645142]
-offset_left = 286.0
-offset_top = -304.0
-offset_right = 566.0
-offset_bottom = -274.0
-theme_override_colors/font_color = Color(0.9, 0.4, 0.4, 1)
-theme_override_font_sizes/font_size = 18
-text = "Enemy Hero  HP: 0"
-horizontal_alignment = 2
-
-[node name="P1HeroLabel" type="Label" parent="HUD" unique_id=851102119]
-offset_left = -556.0
-offset_top = 284.0
-offset_right = -226.0
-offset_bottom = 314.0
-theme_override_colors/font_color = Color(0.4, 0.9, 0.4, 1)
-theme_override_font_sizes/font_size = 18
-text = "Hero  HP: 0"
-
-[node name="EndTurnButton" type="Button" parent="HUD" unique_id=2134851210]
-offset_left = 376.0
-offset_top = 269.0
-offset_right = 566.0
-offset_bottom = 314.0
-theme_override_font_sizes/font_size = 20
+[node name="EndTurnButton" type="Button" parent="HUDRoot/TopRightHUD/TopRightVBox" unique_id=483955868]
+custom_minimum_size = Vector2(150, 32)
+layout_mode = 2
+theme_override_font_sizes/font_size = 17
 text = "End Turn"
 
-[node name="BackButton" type="Button" parent="HUD" unique_id=981273428]
-offset_left = 376.0
-offset_top = 219.0
-offset_right = 566.0
-offset_bottom = 262.0
-theme_override_font_sizes/font_size = 16
+[node name="BackButton" type="Button" parent="HUDRoot/TopRightHUD/TopRightVBox" unique_id=195708922]
+custom_minimum_size = Vector2(150, 20)
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
 text = "Back to Menu"
 
-[connection signal="pressed" from="HUD/BackButton" to="." method="_on_back_button_pressed"]
+[node name="HoverPopup" type="PanelContainer" parent="HUDRoot" unique_id=1547759079]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -12.669983
+offset_top = -40.109985
+offset_right = 226.67004
+offset_bottom = 143.24985
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="HoverVBox" type="VBoxContainer" parent="HUDRoot/HoverPopup" unique_id=210496157]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="CardNameLabel" type="Label" parent="HUDRoot/HoverPopup/HoverVBox" unique_id=1306363370]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Card Name"
+horizontal_alignment = 1
+
+[node name="CardCostLabel" type="Label" parent="HUDRoot/HoverPopup/HoverVBox" unique_id=1012004025]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Cost: 0"
+horizontal_alignment = 1
+
+[node name="CardStatsLabel" type="Label" parent="HUDRoot/HoverPopup/HoverVBox" unique_id=247396192]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "ATK 0  •  HP 0"
+horizontal_alignment = 1
+
+[node name="CardTextLabel" type="Label" parent="HUDRoot/HoverPopup/HoverVBox" unique_id=1420899974]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "Card text."
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="GameOverOverlay" type="PanelContainer" parent="HUDRoot" unique_id=1680663532]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -180.0
+offset_top = -90.0
+offset_right = 180.0
+offset_bottom = 90.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="GameOverVBox" type="VBoxContainer" parent="HUDRoot/GameOverOverlay" unique_id=2136512799]
+layout_mode = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="GameOverLabel" type="Label" parent="HUDRoot/GameOverOverlay/GameOverVBox" unique_id=585997604]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.3, 1)
+theme_override_font_sizes/font_size = 36
+text = "Game Over"
+horizontal_alignment = 1
+
+[node name="GameOverSubLabel" type="Label" parent="HUDRoot/GameOverOverlay/GameOverVBox" unique_id=1401452143]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+
+[node name="GameOverBackButton" type="Button" parent="HUDRoot/GameOverOverlay/GameOverVBox" unique_id=1465460352]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Return to Menu"
+
+[connection signal="pressed" from="HUDRoot/TopRightHUD/TopRightVBox/EndTurnButton" to="." method="_on_end_turn_pressed"]
+[connection signal="pressed" from="HUDRoot/TopRightHUD/TopRightVBox/BackButton" to="." method="_on_back_button_pressed"]
+[connection signal="pressed" from="HUDRoot/GameOverOverlay/GameOverVBox/GameOverBackButton" to="." method="_on_back_button_pressed"]

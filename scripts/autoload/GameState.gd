@@ -7,7 +7,9 @@ var current_round: int = 0
 var is_game_over: bool = false
 
 func update_from_response(data: Dictionary) -> void:
+	if data.has("game_state"):
+		data = data.get("game_state", {})
 	current_player = data.get("current_player", {})
 	opposing_player = data.get("opposing_player", {})
-	current_round = data.get("current_round", 0)
+	current_round = data.get("round", data.get("current_round", 0))
 	is_game_over = data.get("is_game_over", false)

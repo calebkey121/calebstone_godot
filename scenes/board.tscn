@@ -1,19 +1,20 @@
-[gd_scene load_steps=2 format=3 uid="uid://dl3ysciev0wmm"]
+[gd_scene format=3 uid="uid://dl3ysciev0wmm"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_0wblk"]
-size = Vector2(122.235, 20)
+size = Vector2(1020.40814, 185.94104)
 
-[node name="Board" type="Node2D"]
+[node name="Board" type="Node2D" unique_id=1705580103]
 
-[node name="Area2D" type="Area2D" parent="."]
+[node name="BoardBG" type="Polygon2D" parent="." unique_id=315167713]
+z_index = -8
+scale = Vector2(0.9, 1.491)
+color = Color(0.54, 0.44, 0.34, 0.5)
+polygon = PackedVector2Array(-500, -55, 500, -55, 500, 55, 0.36975098, 55, -323.7511, 55, -500, 55)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-scale = Vector2(8.21, 8.21)
+[node name="Area2D" type="Area2D" parent="." unique_id=285614709]
+scale = Vector2(1.491, 1.491)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=773934222]
+position = Vector2(1.4305115e-06, -8.34465e-07)
+scale = Vector2(0.882, 0.882)
 shape = SubResource("RectangleShape2D_0wblk")
-
-[node name="border" type="Line2D" parent="."]
-position = Vector2(-6.043, 0.849)
-scale = Vector2(2.71066, 0.662464)
-points = PackedVector2Array(-182.617, -124.463, 186.681, -124.473, 186.681, 121.91, -182.617, 121.91)
-closed = true
-width = 1.73
