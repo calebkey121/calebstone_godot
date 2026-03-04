@@ -7,14 +7,16 @@ extends Node2D
 @onready var end_turn_button: Button = $HUDRoot/TopRightHUD/TopRightVBox/EndTurnButton
 @onready var gold_label: Label = $HUDRoot/LeftBar/LeftBarVBox/PlayerResources/GoldLabel
 @onready var income_label: Label = $HUDRoot/LeftBar/LeftBarVBox/PlayerResources/IncomeLabel
+@onready var deck_label: Label = $HUDRoot/LeftBar/LeftBarVBox/PlayerResources/DeckLabel
 @onready var round_label: Label = $HUDRoot/TopRightHUD/TopRightVBox/RoundLabel
 @onready var status_label: Label = $HUDRoot/TopRightHUD/TopRightVBox/StatusLabel
 @onready var player_name_label: Label = $HUDRoot/LeftBar/LeftBarVBox/PlayerPortrait/PlayerPortraitVBox/PlayerNameLabel
 @onready var player_hp_label: Label = $HUDRoot/LeftBar/LeftBarVBox/PlayerPortrait/PlayerPortraitVBox/PlayerHPLabel
 @onready var enemy_name_label: Label = $HUDRoot/LeftBar/LeftBarVBox/EnemyPortrait/EnemyPortraitVBox/EnemyNameLabel
 @onready var enemy_hp_label: Label = $HUDRoot/LeftBar/LeftBarVBox/EnemyPortrait/EnemyPortraitVBox/EnemyHPLabel
-@onready var enemy_hand_label: Label = $HUDRoot/LeftBar/LeftBarVBox/EnemyInfo/EnemyHandLabel
+@onready var enemy_deck_label: Label = $HUDRoot/LeftBar/LeftBarVBox/EnemyInfo/EnemyDeckLabel
 @onready var enemy_gold_label: Label = $HUDRoot/LeftBar/LeftBarVBox/EnemyInfo/EnemyGoldLabel
+@onready var enemy_income_label: Label = $HUDRoot/LeftBar/LeftBarVBox/EnemyInfo/EnemyIncomeLabel
 @onready var game_over_overlay: PanelContainer = $HUDRoot/GameOverOverlay
 @onready var game_over_sub_label: Label = $HUDRoot/GameOverOverlay/GameOverVBox/GameOverSubLabel
 @onready var hover_popup: PanelContainer = $HUDRoot/HoverPopup
@@ -50,6 +52,11 @@ func _ready() -> void:
 	CardManager.card_hovered.connect(_on_card_hovered)
 	CardManager.card_unhovered.connect(_on_card_unhovered)
 
+	# Keep hover popup visually above cards and fully mouse-transparent.
+	hover_popup.z_index = 250
+	_set_control_subtree_mouse_filter(hover_popup, Control.MOUSE_FILTER_IGNORE)
+	hover_popup.move_to_front()
+
 	# Mark the player's board as a valid card drop zone
 	var player_board_area = player_board.get_node_or_null("Area2D")
 	if player_board_area:
@@ -58,6 +65,13 @@ func _ready() -> void:
 	# Load initial game state from server
 	current_request = RequestType.LOAD_GAME
 	NetworkManager.load_game(http_request, GameState.session_id)
+
+
+func _set_control_subtree_mouse_filter(root: Control, filter_mode: Control.MouseFilter) -> void:
+	root.mouse_filter = filter_mode
+	for child in root.get_children():
+		if child is Control:
+			_set_control_subtree_mouse_filter(child, filter_mode)
 
 
 # ─────────────────────────────────────────────
@@ -134,6 +148,7 @@ func _update_hud() -> void:
 	round_label.text = "Round %d" % GameState.current_round
 	gold_label.text = "Gold: %d" % cp.get("gold", 0)
 	income_label.text = "Income: %d" % cp.get("income", 0)
+	deck_label.text = "Deck: %d" % cp.get("deck_count", 0)
 
 	var p1_hero = cp.get("hero", {})
 	var p2_hero = op.get("hero", {})
@@ -142,19 +157,24 @@ func _update_hud() -> void:
 	enemy_name_label.text = p2_hero.get("name", "Enemy")
 	enemy_hp_label.text = "HP: %d" % p2_hero.get("health", 0)
 
-	var enemy_hand_count: int = op.get("hand", []).size()
-	enemy_hand_label.text = "Hand: %d" % enemy_hand_count
-	enemy_gold_label.text = "Gold: %d  /  Income: %d" % [
-		op.get("gold", 0), op.get("income", 0)
-	]
+	enemy_gold_label.text = "Gold: %d" % op.get("gold", 0)
+	enemy_income_label.text = "Income: %d" % op.get("income", 0)
+	enemy_deck_label.text = "Deck: %d" % op.get("deck_count", 0)
 
 	if waiting_for_server:
 		status_label.text = "Waiting..."
 		status_label.add_theme_color_override("font_color", Color(0.9, 0.6, 0.2, 1))
+	elif GameState.is_game_over:
+		status_label.text = "Game Over"
+		status_label.add_theme_color_override("font_color", Color(1.0, 0.9, 0.3, 1))
+	elif GameState.active_player_id != "" and GameState.active_player_id != GameState.local_player_id:
+		status_label.text = "Opponent Turn"
+		status_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.9, 1))
 	else:
 		status_label.text = "Your Turn"
 		status_label.add_theme_color_override("font_color", Color(0.4, 1.0, 0.5, 1))
-	end_turn_button.disabled = waiting_for_server
+	var opponent_turn := GameState.active_player_id != "" and GameState.active_player_id != GameState.local_player_id
+	end_turn_button.disabled = waiting_for_server or GameState.is_game_over or opponent_turn
 
 
 # ─────────────────────────────────────────────
@@ -326,8 +346,27 @@ func _on_http_request_completed(_result, response_code, _headers, body) -> void:
 # ─────────────────────────────────────────────
 
 func _show_game_over() -> void:
-	var winner = GameState.current_player.get("hero", {}).get("health", 0)
-	game_over_sub_label.text = "You Win!" if winner > 0 else "You Lose!"
+	var local_hero = GameState.current_player.get("hero", {})
+	var enemy_hero = GameState.opposing_player.get("hero", {})
+	var local_hp: int = local_hero.get("health", 0)
+	var enemy_hp: int = enemy_hero.get("health", 0)
+
+	var local_result_key := "%s_win" % GameState.local_player_id
+	if GameState.result == local_result_key:
+		game_over_sub_label.text = "You Win!"
+	elif GameState.result == "tie":
+		game_over_sub_label.text = "Draw"
+	elif GameState.result != "in_progress":
+		game_over_sub_label.text = "You Lose!"
+	elif local_hp > 0 and enemy_hp <= 0:
+		game_over_sub_label.text = "You Win!"
+	elif local_hp <= 0 and enemy_hp > 0:
+		game_over_sub_label.text = "You Lose!"
+	elif local_hp <= 0 and enemy_hp <= 0:
+		game_over_sub_label.text = "Draw"
+	else:
+		game_over_sub_label.text = "Game Over"
+	hover_popup.visible = false
 	game_over_overlay.visible = true
 	end_turn_button.disabled = true
 
@@ -342,6 +381,7 @@ func _on_card_hovered(card: Card) -> void:
 	hover_cost_label.text = "Cost: %d" % card.data.cost
 	hover_stats_label.text = "ATK %d  •  HP %d" % [card.data.attack, card.data.health]
 	hover_text_label.text = card.data.text if card.data.text != "" else " "
+	hover_popup.move_to_front()
 	hover_popup.visible = true
 
 

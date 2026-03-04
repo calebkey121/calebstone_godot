@@ -89,17 +89,23 @@ horizontal_alignment = 1
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="EnemyHandLabel" type="Label" parent="HUDRoot/LeftBar/LeftBarVBox/EnemyInfo" unique_id=183631904]
+[node name="EnemyGoldLabel" type="Label" parent="HUDRoot/LeftBar/LeftBarVBox/EnemyInfo" unique_id=1220375231]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
+theme_override_font_sizes/font_size = 16
+text = "Gold: 0"
+
+[node name="EnemyIncomeLabel" type="Label" parent="HUDRoot/LeftBar/LeftBarVBox/EnemyInfo" unique_id=1552442387]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.5, 1)
+theme_override_font_sizes/font_size = 13
+text = "Income: 0"
+
+[node name="EnemyDeckLabel" type="Label" parent="HUDRoot/LeftBar/LeftBarVBox/EnemyInfo" unique_id=183631904]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.7, 0.8, 1)
 theme_override_font_sizes/font_size = 12
-text = "Hand: 0"
-
-[node name="EnemyGoldLabel" type="Label" parent="HUDRoot/LeftBar/LeftBarVBox/EnemyInfo" unique_id=1220375231]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.9, 0.8, 0.3, 1)
-theme_override_font_sizes/font_size = 12
-text = "Gold: 0 / Income: 0"
+text = "Deck: 0"
 
 [node name="LeftSpacer" type="Control" parent="HUDRoot/LeftBar/LeftBarVBox" unique_id=1348975572]
 layout_mode = 2
@@ -121,6 +127,12 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.7, 0.5, 1)
 theme_override_font_sizes/font_size = 13
 text = "Income: 0"
+
+[node name="DeckLabel" type="Label" parent="HUDRoot/LeftBar/LeftBarVBox/PlayerResources" unique_id=217098236]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 0.85, 0.95, 1)
+theme_override_font_sizes/font_size = 13
+text = "Deck: 0"
 
 [node name="PlayerPortrait" type="PanelContainer" parent="HUDRoot/LeftBar/LeftBarVBox" unique_id=1095961361]
 layout_mode = 2
@@ -188,6 +200,7 @@ text = "Back to Menu"
 
 [node name="HoverPopup" type="PanelContainer" parent="HUDRoot" unique_id=1547759079]
 visible = false
+z_index = 250
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -204,29 +217,34 @@ mouse_filter = 2
 
 [node name="HoverVBox" type="VBoxContainer" parent="HUDRoot/HoverPopup" unique_id=210496157]
 layout_mode = 2
+mouse_filter = 2
 theme_override_constants/separation = 8
 alignment = 1
 
 [node name="CardNameLabel" type="Label" parent="HUDRoot/HoverPopup/HoverVBox" unique_id=1306363370]
 layout_mode = 2
+mouse_filter = 2
 theme_override_font_sizes/font_size = 18
 text = "Card Name"
 horizontal_alignment = 1
 
 [node name="CardCostLabel" type="Label" parent="HUDRoot/HoverPopup/HoverVBox" unique_id=1012004025]
 layout_mode = 2
+mouse_filter = 2
 theme_override_font_sizes/font_size = 14
 text = "Cost: 0"
 horizontal_alignment = 1
 
 [node name="CardStatsLabel" type="Label" parent="HUDRoot/HoverPopup/HoverVBox" unique_id=247396192]
 layout_mode = 2
+mouse_filter = 2
 theme_override_font_sizes/font_size = 14
 text = "ATK 0  •  HP 0"
 horizontal_alignment = 1
 
 [node name="CardTextLabel" type="Label" parent="HUDRoot/HoverPopup/HoverVBox" unique_id=1420899974]
 layout_mode = 2
+mouse_filter = 2
 theme_override_font_sizes/font_size = 13
 text = "Card text."
 horizontal_alignment = 1
