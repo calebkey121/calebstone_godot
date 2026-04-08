@@ -4,19 +4,17 @@ extends Node2D
 @onready var player_hand: Hand = $Hand
 @onready var player_board = $Board
 @onready var enemy_board = $Board2
+@onready var player_hero_slot: Node2D = $PlayerHeroSlot
+@onready var enemy_hero_slot: Node2D = $EnemyHeroSlot
 @onready var end_turn_button: Button = $HUDRoot/TopRightHUD/TopRightVBox/EndTurnButton
-@onready var gold_label: Label = $HUDRoot/LeftBar/LeftBarVBox/PlayerResources/GoldLabel
-@onready var income_label: Label = $HUDRoot/LeftBar/LeftBarVBox/PlayerResources/IncomeLabel
-@onready var deck_label: Label = $HUDRoot/LeftBar/LeftBarVBox/PlayerResources/DeckLabel
+@onready var gold_label: Label = $HUDRoot/PlayerResourcesHUD/PlayerResources/GoldLabel
+@onready var income_label: Label = $HUDRoot/PlayerResourcesHUD/PlayerResources/IncomeLabel
+@onready var deck_label: Label = $HUDRoot/PlayerResourcesHUD/PlayerResources/DeckLabel
 @onready var round_label: Label = $HUDRoot/TopRightHUD/TopRightVBox/RoundLabel
 @onready var status_label: Label = $HUDRoot/TopRightHUD/TopRightVBox/StatusLabel
-@onready var player_name_label: Label = $HUDRoot/LeftBar/LeftBarVBox/PlayerPortrait/PlayerPortraitVBox/PlayerNameLabel
-@onready var player_hp_label: Label = $HUDRoot/LeftBar/LeftBarVBox/PlayerPortrait/PlayerPortraitVBox/PlayerHPLabel
-@onready var enemy_name_label: Label = $HUDRoot/LeftBar/LeftBarVBox/EnemyPortrait/EnemyPortraitVBox/EnemyNameLabel
-@onready var enemy_hp_label: Label = $HUDRoot/LeftBar/LeftBarVBox/EnemyPortrait/EnemyPortraitVBox/EnemyHPLabel
-@onready var enemy_deck_label: Label = $HUDRoot/LeftBar/LeftBarVBox/EnemyInfo/EnemyDeckLabel
-@onready var enemy_gold_label: Label = $HUDRoot/LeftBar/LeftBarVBox/EnemyInfo/EnemyGoldLabel
-@onready var enemy_income_label: Label = $HUDRoot/LeftBar/LeftBarVBox/EnemyInfo/EnemyIncomeLabel
+@onready var enemy_deck_label: Label = $HUDRoot/EnemyResourcesHUD/EnemyResources/EnemyDeckLabel
+@onready var enemy_gold_label: Label = $HUDRoot/EnemyResourcesHUD/EnemyResources/EnemyGoldLabel
+@onready var enemy_income_label: Label = $HUDRoot/EnemyResourcesHUD/EnemyResources/EnemyIncomeLabel
 @onready var game_over_overlay: PanelContainer = $HUDRoot/GameOverOverlay
 @onready var game_over_sub_label: Label = $HUDRoot/GameOverOverlay/GameOverVBox/GameOverSubLabel
 @onready var hover_popup: PanelContainer = $HUDRoot/HoverPopup
@@ -35,8 +33,8 @@ var debug_pending_action: Dictionary = {}
 
 # Attack selection state
 var selected_attacker: Card = null
-var player_allies: Array = []  # Card nodes on player board
-var enemy_allies: Array = []   # Card nodes on enemy board
+var player_allies: Array = []  # Player-side combat cards (hero slot + board)
+var enemy_allies: Array = []   # Enemy-side combat cards (hero slot + board)
 
 # Prevent double-input while a request is in-flight
 var waiting_for_server: bool = false
@@ -105,23 +103,63 @@ func _rebuild_boards() -> void:
 		ally.queue_free()
 	enemy_allies.clear()
 
+	var player_hero = _hero_to_board_card_data(GameState.current_player.get("hero", {}))
+	var enemy_hero = _hero_to_board_card_data(GameState.opposing_player.get("hero", {}))
 	var player_army: Array = GameState.current_player.get("army", [])
 	var enemy_army: Array = GameState.opposing_player.get("army", [])
 
-	# Army index 0 is the hero — shown in HUD labels, still spawned on board for targeting
+	# Hero cards live in side slots but stay in ally arrays for selection/targeting.
+	if not player_hero.is_empty():
+		var player_hero_card: Card = _spawn_board_card(player_hero, 0, true)
+		player_hero_slot.add_child(player_hero_card)
+		player_allies.append(player_hero_card)
+		player_hero_card.position = Vector2.ZERO
+		player_hero_card.anchor_position = Vector2.ZERO
+
+	if not enemy_hero.is_empty():
+		var enemy_hero_card: Card = _spawn_board_card(enemy_hero, 0, false)
+		enemy_hero_slot.add_child(enemy_hero_card)
+		enemy_allies.append(enemy_hero_card)
+		enemy_hero_card.position = Vector2.ZERO
+		enemy_hero_card.anchor_position = Vector2.ZERO
+
 	for i in range(player_army.size()):
-		var card: Card = _spawn_board_card(player_army[i], i, true)
+		var card: Card = _spawn_board_card(player_army[i], i + 1, true)
 		player_board.add_child(card)
 		player_allies.append(card)
 		card.position = Vector2((i - player_army.size() / 2.0 + 0.5) * 130, 0)
 		card.anchor_position = card.position
 
 	for i in range(enemy_army.size()):
-		var card: Card = _spawn_board_card(enemy_army[i], i, false)
+		var card: Card = _spawn_board_card(enemy_army[i], i + 1, false)
 		enemy_board.add_child(card)
 		enemy_allies.append(card)
 		card.position = Vector2((i - enemy_army.size() / 2.0 + 0.5) * 130, 0)
 		card.anchor_position = card.position
+
+
+func _hero_to_board_card_data(hero: Dictionary) -> Dictionary:
+	if hero.is_empty():
+		return {}
+	var hero_art_id := str(hero.get("hero_id", ""))
+	if hero_art_id == "":
+		hero_art_id = str(hero.get("card_id", ""))
+	if hero_art_id == "":
+		hero_art_id = str(hero.get("name", "hero")).to_lower()
+		hero_art_id = hero_art_id.replace("'", "").replace("-", "_").replace(" ", "_")
+	return {
+		"instance_id": hero.get("instance_id", ""),
+		"card_id": hero_art_id,
+		"name": hero.get("name", "Hero"),
+		"cost": hero.get("cost", 0),
+		"health": hero.get("health", 0),
+		"attack": hero.get("attack", 0),
+		"text": hero.get("text", ""),
+		"can_attack": hero.get("can_attack", false),
+		"type": "card",
+		"zone": "hero",
+		"tags": hero.get("tags", [])
+	}
 
 
 func _spawn_board_card(ally_data: Dictionary, index: int, is_player: bool) -> Card:
@@ -149,13 +187,6 @@ func _update_hud() -> void:
 	gold_label.text = "Gold: %d" % cp.get("gold", 0)
 	income_label.text = "Income: %d" % cp.get("income", 0)
 	deck_label.text = "Deck: %d" % cp.get("deck_count", 0)
-
-	var p1_hero = cp.get("hero", {})
-	var p2_hero = op.get("hero", {})
-	player_name_label.text = p1_hero.get("name", "You")
-	player_hp_label.text = "HP: %d" % p1_hero.get("health", 0)
-	enemy_name_label.text = p2_hero.get("name", "Enemy")
-	enemy_hp_label.text = "HP: %d" % p2_hero.get("health", 0)
 
 	enemy_gold_label.text = "Gold: %d" % op.get("gold", 0)
 	enemy_income_label.text = "Income: %d" % op.get("income", 0)

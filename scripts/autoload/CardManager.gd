@@ -31,6 +31,7 @@ func create_hero(hero_data: CardData):
 func adjust_card(card: Card, data: CardData):
 	card.set_data(data)
 	var card_name = data.name # used for ease further down
+	var art_key = data.card_id if data.card_id != "" else card_name
 	
 	# Frame Adjustments
 	var frame = Settings.card_frame if data.type == "card" else Settings.hero_frame
@@ -69,7 +70,7 @@ func adjust_card(card: Card, data: CardData):
 	
 	
 	set_frame_texture(card, frame, frame_position, frame_scale)
-	set_card_texture(card, card_name, art_region_rect, art_position, art_scale)
+	set_card_texture(card, art_key, art_region_rect, art_position, art_scale)
 	#card.get_node("card_name_label").text = card_name
 	return card
 

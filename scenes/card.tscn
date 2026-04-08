@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://b4ji8allqwrtl" path="res://scripts/Card.gd" id="1_hkf25"]
 [ext_resource type="Texture2D" uid="uid://cxvd8xladxc7b" path="res://assets/card_frames/cf1.png" id="2_ktuci"]
-[ext_resource type="Texture2D" uid="uid://cgi6303sh08uu" path="res://assets/card_art/MercenaryCaptain.png" id="3_kg30u"]
+[ext_resource type="Texture2D" uid="uid://cgi6303sh08uu" path="res://assets/card_art/mercenary_captain.png" id="3_kg30u"]
 [ext_resource type="Texture2D" uid="uid://budbumufmilpc" path="res://assets/card_backs/calebstone_cardback.png" id="4_cardback"]
 
 [node name="Card" type="Node2D" unique_id=1063597279]

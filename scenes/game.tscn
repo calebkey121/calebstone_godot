@@ -41,6 +41,12 @@ position = Vector2(110, -253.97)
 script = ExtResource("4_lbhrr")
 deck_local_origin_pos = Vector2(520, -180)
 
+[node name="EnemyHeroSlot" type="Node2D" parent="." unique_id=164041908]
+position = Vector2(-470, -90)
+
+[node name="PlayerHeroSlot" type="Node2D" parent="." unique_id=360434728]
+position = Vector2(-470, 90)
+
 [node name="HUDRoot" type="Control" parent="." unique_id=650364958]
 layout_mode = 3
 anchors_preset = 0
@@ -50,110 +56,69 @@ offset_right = 576.0
 offset_bottom = 324.0
 mouse_filter = 2
 
-[node name="LeftBar" type="PanelContainer" parent="HUDRoot" unique_id=2056869120]
+[node name="EnemyResourcesHUD" type="PanelContainer" parent="HUDRoot" unique_id=2056869120]
 layout_mode = 1
-anchors_preset = 9
-anchor_bottom = 1.0
-offset_right = 220.0
-grow_horizontal = 0
-grow_vertical = 2
-mouse_filter = 1
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 180.0
+offset_bottom = 92.0
+mouse_filter = 2
 
-[node name="LeftBarVBox" type="VBoxContainer" parent="HUDRoot/LeftBar" unique_id=277036328]
+[node name="EnemyResources" type="VBoxContainer" parent="HUDRoot/EnemyResourcesHUD" unique_id=1610511204]
 layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-theme_override_constants/separation = 14
+theme_override_constants/separation = 2
 
-[node name="EnemyPortrait" type="PanelContainer" parent="HUDRoot/LeftBar/LeftBarVBox" unique_id=179359065]
-layout_mode = 2
-
-[node name="EnemyPortraitVBox" type="VBoxContainer" parent="HUDRoot/LeftBar/LeftBarVBox/EnemyPortrait" unique_id=587518331]
-layout_mode = 2
-
-[node name="EnemyNameLabel" type="Label" parent="HUDRoot/LeftBar/LeftBarVBox/EnemyPortrait/EnemyPortraitVBox" unique_id=1323673383]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.9, 0.55, 0.55, 1)
-theme_override_font_sizes/font_size = 13
-text = "Enemy"
-horizontal_alignment = 1
-
-[node name="EnemyHPLabel" type="Label" parent="HUDRoot/LeftBar/LeftBarVBox/EnemyPortrait/EnemyPortraitVBox" unique_id=858611441]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.3, 0.3, 1)
-theme_override_font_sizes/font_size = 18
-text = "HP: --"
-horizontal_alignment = 1
-
-[node name="EnemyInfo" type="VBoxContainer" parent="HUDRoot/LeftBar/LeftBarVBox" unique_id=1610511204]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="EnemyGoldLabel" type="Label" parent="HUDRoot/LeftBar/LeftBarVBox/EnemyInfo" unique_id=1220375231]
+[node name="EnemyGoldLabel" type="Label" parent="HUDRoot/EnemyResourcesHUD/EnemyResources" unique_id=1220375231]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
 theme_override_font_sizes/font_size = 16
 text = "Gold: 0"
 
-[node name="EnemyIncomeLabel" type="Label" parent="HUDRoot/LeftBar/LeftBarVBox/EnemyInfo" unique_id=1552442387]
+[node name="EnemyIncomeLabel" type="Label" parent="HUDRoot/EnemyResourcesHUD/EnemyResources" unique_id=1552442387]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.7, 0.5, 1)
 theme_override_font_sizes/font_size = 13
 text = "Income: 0"
 
-[node name="EnemyDeckLabel" type="Label" parent="HUDRoot/LeftBar/LeftBarVBox/EnemyInfo" unique_id=183631904]
+[node name="EnemyDeckLabel" type="Label" parent="HUDRoot/EnemyResourcesHUD/EnemyResources" unique_id=183631904]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.7, 0.8, 1)
 theme_override_font_sizes/font_size = 12
 text = "Deck: 0"
 
-[node name="LeftSpacer" type="Control" parent="HUDRoot/LeftBar/LeftBarVBox" unique_id=1348975572]
-layout_mode = 2
-size_flags_vertical = 3
+[node name="PlayerResourcesHUD" type="PanelContainer" parent="HUDRoot" unique_id=1095961361]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = -92.0
+offset_right = 180.0
+offset_bottom = -8.0
+grow_vertical = 0
+mouse_filter = 2
 
-[node name="PlayerResources" type="VBoxContainer" parent="HUDRoot/LeftBar/LeftBarVBox" unique_id=563283024]
+[node name="PlayerResources" type="VBoxContainer" parent="HUDRoot/PlayerResourcesHUD" unique_id=563283024]
 layout_mode = 2
-size_flags_horizontal = 3
-alignment = 1
+theme_override_constants/separation = 2
 
-[node name="GoldLabel" type="Label" parent="HUDRoot/LeftBar/LeftBarVBox/PlayerResources" unique_id=1865203297]
+[node name="GoldLabel" type="Label" parent="HUDRoot/PlayerResourcesHUD/PlayerResources" unique_id=1865203297]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
 theme_override_font_sizes/font_size = 16
 text = "Gold: 0"
 
-[node name="IncomeLabel" type="Label" parent="HUDRoot/LeftBar/LeftBarVBox/PlayerResources" unique_id=1459866149]
+[node name="IncomeLabel" type="Label" parent="HUDRoot/PlayerResourcesHUD/PlayerResources" unique_id=1459866149]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.7, 0.5, 1)
 theme_override_font_sizes/font_size = 13
 text = "Income: 0"
 
-[node name="DeckLabel" type="Label" parent="HUDRoot/LeftBar/LeftBarVBox/PlayerResources" unique_id=217098236]
+[node name="DeckLabel" type="Label" parent="HUDRoot/PlayerResourcesHUD/PlayerResources" unique_id=217098236]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.75, 0.85, 0.95, 1)
 theme_override_font_sizes/font_size = 13
 text = "Deck: 0"
-
-[node name="PlayerPortrait" type="PanelContainer" parent="HUDRoot/LeftBar/LeftBarVBox" unique_id=1095961361]
-layout_mode = 2
-
-[node name="PlayerPortraitVBox" type="VBoxContainer" parent="HUDRoot/LeftBar/LeftBarVBox/PlayerPortrait" unique_id=759601682]
-layout_mode = 2
-alignment = 1
-
-[node name="PlayerNameLabel" type="Label" parent="HUDRoot/LeftBar/LeftBarVBox/PlayerPortrait/PlayerPortraitVBox" unique_id=792933341]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.55, 0.9, 0.55, 1)
-theme_override_font_sizes/font_size = 13
-text = "You"
-horizontal_alignment = 1
-
-[node name="PlayerHPLabel" type="Label" parent="HUDRoot/LeftBar/LeftBarVBox/PlayerPortrait/PlayerPortraitVBox" unique_id=1931184390]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.3, 1, 0.4, 1)
-theme_override_font_sizes/font_size = 20
-text = "HP: --"
-horizontal_alignment = 1
 
 [node name="TopRightHUD" type="PanelContainer" parent="HUDRoot" unique_id=1485861163]
 layout_mode = 0

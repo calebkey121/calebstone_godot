@@ -9,6 +9,11 @@ var is_player_ally: bool = true
 var is_selected: bool = false
 var is_targetable: bool = false
 
+const SELECTED_BORDER_COLOR := Color(0.45, 1.0, 0.55, 1.0)
+const READY_ATTACK_BORDER_COLOR := Color(0.15, 0.9, 0.25, 0.95)
+const TARGETABLE_BORDER_COLOR := Color(1.0, 0.2, 0.2, 1.0)
+const HIDDEN_BORDER_COLOR := Color(1, 1, 1, 0)
+
 signal ally_clicked(ally)
 
 @export var editor_preview_enabled: bool = true
@@ -52,11 +57,13 @@ func set_targetable(val: bool) -> void:
 func _update_highlight() -> void:
 	var border = $border
 	if is_selected:
-		border.default_color = Color(0.2, 1.0, 0.2, 1.0)  # Green — selected attacker
+		border.default_color = SELECTED_BORDER_COLOR
 	elif is_targetable:
-		border.default_color = Color(1.0, 0.2, 0.2, 1.0)  # Red — valid attack target
+		border.default_color = TARGETABLE_BORDER_COLOR
+	elif is_player_ally and data.get("can_attack", false):
+		border.default_color = READY_ATTACK_BORDER_COLOR
 	else:
-		border.default_color = Color(1, 1, 1, 0)           # Invisible
+		border.default_color = HIDDEN_BORDER_COLOR
 
 func _on_clickable_area_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:

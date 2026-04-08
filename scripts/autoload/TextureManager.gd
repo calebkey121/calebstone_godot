@@ -13,56 +13,74 @@ func preload_textures():
 	textures["card_frame_11"] = preload("res://assets/card_frames/card_frame_11.png")
 	textures["card_frame_12"] = preload("res://assets/card_frames/card_frame_12.png")
 	textures["card_frame_cf1"] = preload("res://assets/card_frames/cf1.png")
-	textures["Wyndhaven Enclave"] = preload("res://assets/card_art/WyndhavenEnclave.png")
-	textures["Ruthless Baroness"] = preload("res://assets/card_art/RuthlessBaroness.png")
-	textures["Underground Kingpin"] = preload("res://assets/card_art/UndergroundKingpin.png")
-	textures["Crown's Secretkeeper"] = preload("res://assets/card_art/CrownsSecretkeeper.png")
-	textures["Forgebound Smith"] = preload("res://assets/card_art/ForgeboundSmith.png")
-	textures["Guild Enforcer"] = preload("res://assets/card_art/GuildEnforcer.png")
-	textures["Plague Doctor"] = preload("res://assets/card_art/PlagueDoctor.png")
-	textures["Bandit Outlaw"] = preload("res://assets/card_art/BanditOutlaw.png")
-	textures["Banshee's Wail"] = preload("res://assets/card_art/BansheesWail.png")
-	textures["Bone Collector"] = preload("res://assets/card_art/BoneCollector.png")
-	textures["Bow Marshal"] = preload("res://assets/card_art/BowMarshal.png")
-	textures["Castle Ward"] = preload("res://assets/card_art/CastleWard.png")
-	textures["Court Alchemist"] = preload("res://assets/card_art/CourtAlchemist.png")
-	textures["Crypt Creeper"] = preload("res://assets/card_art/CryptCreeper.png")
-	textures["Cursed Squire"] = preload("res://assets/card_art/CursedSquire.png")
-	textures["Dire Wolf"] = preload("res://assets/card_art/DireWolf.png")
-	textures["Ghoul Vanguard"] = preload("res://assets/card_art/GhoulVanguard.png")
-	textures["Ghostly Raider"] = preload("res://assets/card_art/GhostlyRaider.png")
-	textures["Graveyard Sentinel"] = preload("res://assets/card_art/GraveyardSentinel.png")
-	textures["Highland Scout"] = preload("res://assets/card_art/HighlandScout.png")
-	textures["Highwayman's Ambush"] = preload("res://assets/card_art/HighwaymansAmbush.png")
-	textures["Jousting Champion"] = preload("res://assets/card_art/JoustingChampion.png")
-	textures["Mercenary Captain"] = preload("res://assets/card_art/MercenaryCaptain.png")
-	textures["Mournful Spirit"] = preload("res://assets/card_art/MournfulSpirit.png")
-	textures["Necromancer of the Forgotten Depths"] = preload("res://assets/card_art/NecromancerOfTheForgottenDepths.png")
-	textures["Necromancer of the Vale"] = preload("res://assets/card_art/NecromancerOfTheVale.png")
-	textures["Necropolis Guard"] = preload("res://assets/card_art/NecropolisGuard.png")
-	textures["Phantom Steed"] = preload("res://assets/card_art/PhantomSteed.png")
-	textures["Revenant Archer"] = preload("res://assets/card_art/RevenantArcher.png")
-	textures["Royal Falconer"] = preload("res://assets/card_art/RoyalFalconer.png")
-	textures["Shadow of the Past"] = preload("res://assets/card_art/ShadowOfThePast.png")
-	textures["Siege Engineer"] = preload("res://assets/card_art/SiegeEngineer.png")
-	textures["Skeletal Knight"] = preload("res://assets/card_art/SkeletalKnight.png")
-	textures["Spectral Ferryman"] = preload("res://assets/card_art/SpectralFerryman.png")
-	textures["Tomb Warden"] = preload("res://assets/card_art/TombWarden.png")
-	textures["Undead Creature"] = preload("res://assets/card_art/UndeadCreature.png")
-	textures["Village Blacksmith"] = preload("res://assets/card_art/VillageBlacksmith.png")
-	textures["Icelord of Despair"] = preload("res://assets/card_art/IcelordOfDespair.webp")
-	textures["Wandering Minstrel"] = preload("res://assets/card_art/WanderingMinstrel.png")
-	textures["Wandering Ronin"] = preload("res://assets/card_art/WanderingRonin.png")
-	textures["Auctor Noctis"] = preload("res://assets/card_art/AuctorNoctis.png")
-	textures["Ebon Mortem"] = preload("res://assets/card_art/EbonMortem.png")
-	textures["Forest Guardian"] = preload("res://assets/card_art/ForestGuardian.png")
-	textures["Undead Creatures"] = preload("res://assets/card_art/UndeadCreatures.png")
 
-	# Add more textures as needed
-	
+	# Global art fallback when dynamic lookup misses.
+	textures["default_card_art"] = preload("res://assets/card_art/mercenary_captain.png")
+
+
 func get_texture(tex_name):
 	if textures.has(tex_name):
 		return textures[tex_name]
-	else:
-		print("Texture not found: ", tex_name)
-		return null
+
+	var key := str(tex_name)
+
+	# Frame keys are static.
+	if key.begins_with("card_frame"):
+		push_warning("Frame not found: %s" % key)
+		return textures.get("card_frame_cf1", null)
+
+	# Card art keys are dynamic. Prefer API card_id (snake_case), then normalize
+	# legacy display-name/PascalCase keys to snake_case.
+	var dynamic_texture = _load_dynamic_art_texture(key)
+	if dynamic_texture != null:
+		textures[key] = dynamic_texture
+		return dynamic_texture
+
+	push_warning("Texture not found: %s" % key)
+	return textures.get("default_card_art", null)
+
+
+func _load_dynamic_art_texture(key: String):
+	var candidates: Array[String] = []
+
+	# If caller already passed a direct asset-like key, try it first.
+	candidates.append(key)
+
+	# Legacy/display name and PascalCase normalization to snake_case.
+	candidates.append(_to_snake_asset_key(key))
+
+	for base in candidates:
+		var cleaned = base.strip_edges()
+		if cleaned == "":
+			continue
+		var png_path = "res://assets/card_art/%s.png" % cleaned
+		if ResourceLoader.exists(png_path):
+			return load(png_path)
+		var webp_path = "res://assets/card_art/%s.webp" % cleaned
+		if ResourceLoader.exists(webp_path):
+			return load(webp_path)
+	return null
+
+
+func _to_snake_asset_key(value: String) -> String:
+	var normalized = value.strip_edges().replace("'", "").replace("-", " ").replace("_", " ")
+	var tokens = normalized.split(" ", false)
+	var out := ""
+	for token in tokens:
+		if token == "":
+			continue
+		var token_out := ""
+		for i in range(token.length()):
+			var ch = token.substr(i, 1)
+			var is_upper = ch == ch.to_upper() and ch != ch.to_lower()
+			if is_upper and i > 0:
+				var prev = token.substr(i - 1, 1)
+				var prev_is_alpha = prev == prev.to_lower() and prev != prev.to_upper()
+				var prev_is_digit = prev >= "0" and prev <= "9"
+				if prev_is_alpha or prev_is_digit:
+					token_out += "_"
+			token_out += ch.to_lower()
+		if out != "":
+			out += "_"
+		out += token_out
+	return out

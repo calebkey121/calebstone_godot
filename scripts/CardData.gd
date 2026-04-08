@@ -19,4 +19,4 @@ func _init(data: Dictionary):
 	self.health = data.get("health", 0)
 	self.cost = data.get("cost", 0)
 	self.text = data.get("text", "")
-	self.type = "card"
+	self.type = data.get("type", "card")

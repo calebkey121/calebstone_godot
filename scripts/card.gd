@@ -18,6 +18,11 @@ var can_attack: bool = false
 @export var card_back_offset := Vector2(-3.0, 0.0)
 @export var card_back_scale := Vector2(0.3, 0.3)
 
+const SELECTED_BORDER_COLOR := Color(0.45, 1.0, 0.55, 1.0)
+const READY_ATTACK_BORDER_COLOR := Color(0.15, 0.9, 0.25, 0.95)
+const TARGETABLE_BORDER_COLOR := Color(1.0, 0.2, 0.2, 1.0)
+const HIDDEN_BORDER_COLOR := Color(1, 1, 1, 0)
+
 func set_data(new_data: CardData):
 	data = new_data
 	update_data_ui()
@@ -203,11 +208,13 @@ func _update_highlight() -> void:
 	if not border:
 		return
 	if is_selected:
-		border.default_color = Color(0.2, 1.0, 0.2, 1.0)
+		border.default_color = SELECTED_BORDER_COLOR
 	elif is_targetable:
-		border.default_color = Color(1.0, 0.2, 0.2, 1.0)
+		border.default_color = TARGETABLE_BORDER_COLOR
+	elif can_attack and is_player_ally:
+		border.default_color = READY_ATTACK_BORDER_COLOR
 	else:
-		border.default_color = Color(1, 1, 1, 0)
+		border.default_color = HIDDEN_BORDER_COLOR
 
 
 func set_face_down(value: bool) -> void:
