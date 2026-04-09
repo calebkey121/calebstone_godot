@@ -60,7 +60,7 @@ This document gives a high-level map of the Godot client so a new contributor ca
 - Play card action uses `card_instance_id`.
 - Attack action uses `attacker_id` and `target_id`.
 - `GameState` consumes `round` with fallback to legacy `current_round`.
-- Current known backend behavior: `POST /api/action` may return pre-action `game_state`, while subsequent `GET /api/game_state` reflects updated state.
+- Current known backend behavior: `POST /action` may return pre-action `game_state`, while subsequent `GET /game_state` reflects updated state.
 
 ## Near-Term TODOs
 - Add a smooth animation from card release point to final board slot when a hand card is played.
