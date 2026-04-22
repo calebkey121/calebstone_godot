@@ -1,120 +1,70 @@
-[gd_scene load_steps=2 format=3 uid="uid://bjc6mr6dlaswj"]
+[gd_scene format=3 uid="uid://bjc6mr6dlaswj"]
 
 [ext_resource type="Script" uid="uid://cdftm83n0umge" path="res://scripts/menu.gd" id="1_ggjmf"]
 
-[node name="Menu" type="Control"]
+[node name="Menu" type="Control" unique_id=72956608]
 layout_mode = 3
-anchors_preset = 0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1_ggjmf")
 
-[node name="NewGameButton" type="Button" parent="."]
-layout_mode = 0
-offset_left = 50.0
-offset_top = 450.0
-offset_right = 250.0
-offset_bottom = 550.0
-text = "New Game"
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.9, 0.85, 0.76, 1)
 
-[node name="QuitButton" type="Button" parent="."]
-layout_mode = 0
-offset_left = 300.0
-offset_top = 450.0
-offset_right = 500.0
-offset_bottom = 550.0
-text = "End game"
-
-[node name="HTTPRequest" type="HTTPRequest" parent="."]
-
-[node name="LoadGameButton" type="Button" parent="."]
-layout_mode = 0
-offset_left = 200.0
-offset_top = 50.0
-offset_right = 300.0
-offset_bottom = 100.0
-text = "Load Game
-"
-
-[node name="RefreshSessionsButton" type="Button" parent="."]
-layout_mode = 0
-offset_left = 200.0
-offset_top = 110.0
+[node name="Backdrop" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -160.0
 offset_right = 300.0
 offset_bottom = 160.0
-text = "Refresh"
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.67, 0.57, 0.45, 0.2)
 
-[node name="SessionListNode" type="Control" parent="."]
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
+[node name="TitleLabel" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -140.0
+offset_top = -58.0
+offset_right = 140.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 28
+text = "Calebstone"
+horizontal_alignment = 1
 
-[node name="SessionList" type="ItemList" parent="SessionListNode"]
-layout_mode = 0
-offset_left = 50.0
-offset_top = 50.0
-offset_right = 150.0
-offset_bottom = 200.0
+[node name="NewGameButton" type="Button" parent="." unique_id=569469298]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -110.0
+offset_top = 20.0
+offset_right = 110.0
+offset_bottom = 78.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "New Game"
 
-[node name="SessionListLabel" type="Label" parent="SessionListNode"]
-layout_mode = 0
-offset_left = 56.0
-offset_top = 25.0
-offset_right = 146.0
-offset_bottom = 48.0
-text = "Session List"
-
-[node name="Player1ControllerNode" type="Control" parent="."]
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
-[node name="Player1Controller" type="ItemList" parent="Player1ControllerNode"]
-layout_mode = 0
-offset_left = 50.0
-offset_top = 300.0
-offset_right = 250.0
-offset_bottom = 400.0
-item_count = 2
-item_0/text = "Human"
-item_1/text = "Random"
-item_1/selectable = false
-item_1/disabled = true
-
-[node name="Player1ControllerLabel" type="Label" parent="Player1ControllerNode"]
-layout_mode = 0
-offset_left = 79.0
-offset_top = 275.0
-offset_right = 223.0
-offset_bottom = 298.0
-text = "Player 1 Controller"
-
-[node name="Player2ControllerNode" type="Control" parent="."]
-anchors_preset = 0
-offset_left = 50.0
-offset_top = 300.0
-offset_right = 90.0
-offset_bottom = 340.0
-
-[node name="Player2Controller" type="ItemList" parent="Player2ControllerNode"]
-layout_mode = 0
-offset_left = 250.0
-offset_right = 450.0
-offset_bottom = 100.0
-item_count = 2
-item_0/text = "Human"
-item_0/selectable = false
-item_0/disabled = true
-item_1/text = "Random"
-
-[node name="Player2ControllerLabel" type="Label" parent="Player2ControllerNode"]
-layout_mode = 0
-offset_left = 280.0
-offset_top = -25.0
-offset_right = 424.0
-offset_bottom = -2.0
-text = "Player 2 Controller"
-
-[connection signal="pressed" from="LoadGameButton" to="." method="_on_load_game_button_pressed"]
-[connection signal="pressed" from="RefreshSessionsButton" to="." method="_on_refresh_sessions_button_pressed"]
-[connection signal="item_selected" from="SessionListNode/SessionList" to="." method="_on_session_list_item_selected"]
-[connection signal="item_selected" from="Player1ControllerNode/Player1Controller" to="." method="_on_player_1_controller_item_selected"]
-[connection signal="item_selected" from="Player2ControllerNode/Player2Controller" to="." method="_on_player_2_controller_item_selected"]
+[node name="HTTPRequest" type="HTTPRequest" parent="." unique_id=1499749210]

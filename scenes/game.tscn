@@ -14,6 +14,7 @@ script = ExtResource("1_lh5wj")
 
 [node name="Background" type="Polygon2D" parent="." unique_id=832938410]
 z_index = -10
+scale = Vector2(28.93, 28.93)
 color = Color(0.91, 0.86, 0.78, 1)
 polygon = PackedVector2Array(-576, -324, 576, -324, 576, 324, -576, 324)
 
@@ -88,7 +89,7 @@ text = "Deck: 0"
 
 [node name="PlayerResourcesHUD" type="PanelContainer" parent="HUDRoot" unique_id=1095961361]
 layout_mode = 1
-anchors_preset = 4
+anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
 offset_left = 8.0
@@ -121,15 +122,14 @@ theme_override_font_sizes/font_size = 13
 text = "Deck: 0"
 
 [node name="TopRightHUD" type="PanelContainer" parent="HUDRoot" unique_id=1485861163]
-layout_mode = 0
+layout_mode = 1
+anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
 offset_left = -230.0
 offset_top = 8.0
 offset_right = -8.0
 offset_bottom = 108.0
-grow_horizontal = 0
-grow_vertical = 0
 mouse_filter = 1
 
 [node name="TopRightVBox" type="VBoxContainer" parent="HUDRoot/TopRightHUD" unique_id=731073548]
@@ -188,28 +188,24 @@ alignment = 1
 
 [node name="CardNameLabel" type="Label" parent="HUDRoot/HoverPopup/HoverVBox" unique_id=1306363370]
 layout_mode = 2
-mouse_filter = 2
 theme_override_font_sizes/font_size = 18
 text = "Card Name"
 horizontal_alignment = 1
 
 [node name="CardCostLabel" type="Label" parent="HUDRoot/HoverPopup/HoverVBox" unique_id=1012004025]
 layout_mode = 2
-mouse_filter = 2
 theme_override_font_sizes/font_size = 14
 text = "Cost: 0"
 horizontal_alignment = 1
 
 [node name="CardStatsLabel" type="Label" parent="HUDRoot/HoverPopup/HoverVBox" unique_id=247396192]
 layout_mode = 2
-mouse_filter = 2
 theme_override_font_sizes/font_size = 14
 text = "ATK 0  •  HP 0"
 horizontal_alignment = 1
 
 [node name="CardTextLabel" type="Label" parent="HUDRoot/HoverPopup/HoverVBox" unique_id=1420899974]
 layout_mode = 2
-mouse_filter = 2
 theme_override_font_sizes/font_size = 13
 text = "Card text."
 horizontal_alignment = 1

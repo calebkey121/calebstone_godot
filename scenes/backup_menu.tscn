@@ -1,0 +1,120 @@
+[gd_scene format=3 uid="uid://cuep6xrl1a27j"]
+
+[ext_resource type="Script" uid="uid://cdftm83n0umge" path="res://scripts/menu.gd" id="1_847mu"]
+
+[node name="Menu" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_847mu")
+
+[node name="NewGameButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 50.0
+offset_top = 450.0
+offset_right = 250.0
+offset_bottom = 550.0
+text = "New Game"
+
+[node name="QuitButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 300.0
+offset_top = 450.0
+offset_right = 500.0
+offset_bottom = 550.0
+text = "End game"
+
+[node name="HTTPRequest" type="HTTPRequest" parent="."]
+
+[node name="LoadGameButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 200.0
+offset_top = 50.0
+offset_right = 300.0
+offset_bottom = 100.0
+text = "Load Game
+"
+
+[node name="RefreshSessionsButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 200.0
+offset_top = 110.0
+offset_right = 300.0
+offset_bottom = 160.0
+text = "Refresh"
+
+[node name="SessionListNode" type="Control" parent="."]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="SessionList" type="ItemList" parent="SessionListNode"]
+layout_mode = 0
+offset_left = 50.0
+offset_top = 50.0
+offset_right = 150.0
+offset_bottom = 200.0
+
+[node name="SessionListLabel" type="Label" parent="SessionListNode"]
+layout_mode = 0
+offset_left = 56.0
+offset_top = 25.0
+offset_right = 146.0
+offset_bottom = 48.0
+text = "Session List"
+
+[node name="Player1ControllerNode" type="Control" parent="."]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Player1Controller" type="ItemList" parent="Player1ControllerNode"]
+layout_mode = 0
+offset_left = 50.0
+offset_top = 300.0
+offset_right = 250.0
+offset_bottom = 400.0
+item_count = 2
+item_0/text = "Human"
+item_1/text = "Random"
+item_1/selectable = false
+item_1/disabled = true
+
+[node name="Player1ControllerLabel" type="Label" parent="Player1ControllerNode"]
+layout_mode = 0
+offset_left = 79.0
+offset_top = 275.0
+offset_right = 223.0
+offset_bottom = 298.0
+text = "Player 1 Controller"
+
+[node name="Player2ControllerNode" type="Control" parent="."]
+anchors_preset = 0
+offset_left = 50.0
+offset_top = 300.0
+offset_right = 90.0
+offset_bottom = 340.0
+
+[node name="Player2Controller" type="ItemList" parent="Player2ControllerNode"]
+layout_mode = 0
+offset_left = 250.0
+offset_right = 450.0
+offset_bottom = 100.0
+item_count = 2
+item_0/text = "Human"
+item_0/selectable = false
+item_0/disabled = true
+item_1/text = "Random"
+
+[node name="Player2ControllerLabel" type="Label" parent="Player2ControllerNode"]
+layout_mode = 0
+offset_left = 280.0
+offset_top = -25.0
+offset_right = 424.0
+offset_bottom = -2.0
+text = "Player 2 Controller"
+
+[connection signal="pressed" from="LoadGameButton" to="." method="_on_load_game_button_pressed"]
+[connection signal="pressed" from="RefreshSessionsButton" to="." method="_on_refresh_sessions_button_pressed"]
+[connection signal="item_selected" from="SessionListNode/SessionList" to="." method="_on_session_list_item_selected"]
+[connection signal="item_selected" from="Player1ControllerNode/Player1Controller" to="." method="_on_player_1_controller_item_selected"]
+[connection signal="item_selected" from="Player2ControllerNode/Player2Controller" to="." method="_on_player_2_controller_item_selected"]
